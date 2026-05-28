@@ -57,24 +57,30 @@ adminRouter.post('/concerts', requireAdmin, async (req, res) => {
       concerts.push(newConcert);
 
       // Notify subscribers for new concerts
-      const { data: subs } = await supabase.from('subscriptions').select('*');
-      const matching = (subs || []).filter(s =>
-        artist.toLowerCase().includes(s.artist.toLowerCase()) ||
-        s.artist.toLowerCase().includes(artist.toLowerCase())
-      );
-      for (const s of matching) {
-        const dateStr = endDate ? `${date} → ${endDate}` : date;
-        sendSubscriptionEmail({
-          to: s.email,
-          artist,
-          dateStr,
-          venueName,
-          description: description || '',
-        });
-      }
-      if (matching.length > 0) {
-        await supabase.from('subscriptions').delete().in('id', matching.map(s => s.id));
-        console.log(`Sent ${matching.length} subscription emails for ${artist} (subscriptions cleared)`);
+      try {
+        const { data: subs, error: subErr } = await supabase.from('subscriptions').select('*');
+        if (subErr) console.error('Supabase query error:', subErr);
+        const matching = (subs || []).filter(s =>
+          artist.toLowerCase().includes(s.artist.toLowerCase()) ||
+          s.artist.toLowerCase().includes(artist.toLowerCase())
+        );
+        console.log(`Found ${matching.length} subscribers for ${artist}`);
+        for (const s of matching) {
+          const dateStr = endDate ? `${date} → ${endDate}` : date;
+          sendSubscriptionEmail({
+            to: s.email,
+            artist,
+            dateStr,
+            venueName,
+            description: description || '',
+          });
+        }
+        if (matching.length > 0) {
+          await supabase.from('subscriptions').delete().in('id', matching.map(s => s.id));
+          console.log(`Sent ${matching.length} emails, cleared subscriptions`);
+        }
+      } catch (e) {
+        console.error('Subscription notify error:', e.message);
       }
     }
     await writeData('concerts', concerts);
