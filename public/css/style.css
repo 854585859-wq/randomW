@@ -28,7 +28,9 @@ a { color: var(--ink); text-decoration: none; }
 
 /* ---- Top Bar ---- */
 .topbar {
-  background: var(--paper);
+  background-color: var(--paper);
+  background-image: radial-gradient(circle, var(--line) 1px, transparent 1px);
+  background-size: 18px 18px;
   border-bottom: 0.5px solid var(--line);
   text-align: center;
 }
