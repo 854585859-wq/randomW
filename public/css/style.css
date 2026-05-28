@@ -76,7 +76,7 @@ a { color: var(--ink); text-decoration: none; }
   padding: 0.5rem 1.2rem; border: 0.5px solid var(--line);
   font-size: 0.76rem; font-family: var(--sans); font-weight: 300;
   cursor: pointer; transition: all .25s; background: transparent; color: var(--ink);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.02em; touch-action: manipulation;
 }
 .btn:hover { border-color: var(--ink-25); background: rgba(0,0,0,0.02); }
 .btn-primary { background: var(--ink); color: #fff; border-color: var(--ink); font-weight: 400; }
@@ -223,9 +223,43 @@ th { font-weight: 400; color: var(--ink-50); font-size: 0.7rem; letter-spacing: 
 .hr { border: none; border-top: 0.5px solid var(--line); margin: 1.5rem 0; }
 
 /* ---- Responsive ---- */
-@media (max-width: 600px) {
-  .topbar-links { gap: 1rem; }
-  .topbar-logo { font-size: 2rem; }
-  .calendar-cell { min-height: 55px; font-size: 0.65rem; }
-  .schedule-item { flex-wrap: wrap; gap: 0.3rem; }
+@media (max-width: 640px) {
+  .topbar-inner { padding: 1.5rem 1rem 0; }
+  .topbar-logo { font-size: 1.8rem; }
+  .topbar-links { gap: 1.2rem; }
+  .topbar-links a { font-size: 0.7rem; }
+  .topbar-subtitle { font-size: 0.65rem; }
+  .container { padding: 1rem 0.75rem 3rem; }
+
+  /* Calendar */
+  .calendar-header { flex-wrap: wrap; gap: 0.5rem; }
+  .calendar-header h2 { font-size: 0.95rem; }
+  .calendar-cell { min-height: 70px; padding: 0.25rem; }
+  .calendar-day-header { padding: 0.4rem 0; font-size: 0.6rem; }
+  .calendar-event { font-size: 0.58rem; padding: 0.15rem 0.3rem; margin-bottom: 0.08rem; }
+
+  /* Touch-friendly buttons */
+  .btn { min-height: 36px; padding: 0.5rem 0.9rem; }
+  .btn-sm { min-height: 32px; padding: 0.3rem 0.7rem; }
+
+  /* Modal full-width */
+  .modal { max-width: 100%; margin: 0 0.5rem; padding: 1.2rem; border-radius: 0; }
+  .modal h3 { font-size: 0.95rem; }
+
+  /* Table scroll */
+  .table-wrap { margin: 0 -0.75rem; padding: 0 0.75rem; }
+
+  /* Venue buttons */
+  .venue-btn-group { gap: 0.5rem; }
+  .venue-btn { font-size: 0.78rem; min-height: 38px; padding: 0.5rem 1rem; }
+
+  /* Forms */
+  .form-input { font-size: 0.9rem; padding: 0.6rem 0.75rem; }
+
+  /* Schedule */
+  .schedule-item { flex-wrap: wrap; gap: 0.4rem; font-size: 0.78rem; }
+  .schedule-date { min-width: auto; width: auto; }
+
+  /* Dashboard tabs */
+  .tab { padding: 0.5rem 0.7rem; font-size: 0.73rem; }
 }
