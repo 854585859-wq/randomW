@@ -69,18 +69,30 @@
       if (allConcerts.length === 0) {
         html += '<div class="empty"><div class="empty-icon">🎤</div><p>暂无演唱会</p></div>';
       } else {
-        html += '<div class="table-wrap"><table><thead><tr><th>日期</th><th>艺人</th><th>场馆</th><th>描述</th><th></th></tr></thead><tbody>';
+        // Group by venueId, sort by date within each group
+        const grouped = {};
         allConcerts.forEach(c => {
-          html += `<tr>
-            <td>${c.endDate ? escHtml(c.date) + ' → ' + escHtml(c.endDate) : escHtml(c.date)}</td>
-            <td><strong>${escHtml(c.artist)}</strong></td>
-            <td>${escHtml(vm[c.venueId] || c.venueName)}</td>
-            <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(c.description || '-')}</td>
-            <td style="white-space:nowrap;">
-              <button class="btn btn-sm" onclick="startEditConcert(${c.id})">编辑</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteConcert(${c.id})">删除</button></td></tr>`;
+          const vId = c.venueId;
+          if (!grouped[vId]) grouped[vId] = [];
+          grouped[vId].push(c);
         });
-        html += '</tbody></table></div>';
+        Object.values(grouped).forEach(arr => arr.sort((a, b) => a.date.localeCompare(b.date)));
+
+        for (const [vId, concerts] of Object.entries(grouped)) {
+          const vName = concerts[0].venueName;
+          html += `<h3 style="font-family:var(--serif);font-weight:400;font-size:0.9rem;margin:1rem 0 0.4rem;color:var(--ink-50);">${escHtml(vName)} · ${concerts.length} 场</h3>`;
+          html += '<div class="table-wrap"><table><thead><tr><th>日期</th><th>艺人</th><th>描述</th><th></th></tr></thead><tbody>';
+          concerts.forEach(c => {
+            html += `<tr>
+              <td>${c.endDate ? escHtml(c.date) + ' → ' + escHtml(c.endDate) : escHtml(c.date)}</td>
+              <td><strong>${escHtml(c.artist)}</strong></td>
+              <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(c.description || '-')}</td>
+              <td style="white-space:nowrap;">
+                <button class="btn btn-sm" onclick="startEditConcert(${c.id})">编辑</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteConcert(${c.id})">删除</button></td></tr>`;
+          });
+          html += '</tbody></table></div>';
+        }
       }
 
       // Form
