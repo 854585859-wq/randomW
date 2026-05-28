@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap');
-@import url('https://fonts.cdnfonts.com/css/butler');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -12,9 +10,9 @@
   --line: #e0dbd0;
   --accent: #c4875c;
   --accent-deep: #8b3a1f;
-  --serif: 'Butler', Georgia, serif;
-  --serif-display: 'Butler', Georgia, serif;
-  --sans: 'Noto Sans SC', 'Noto Sans KR', 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+  --serif: 'Songti SC', 'STSong', 'SimSun', 'Times New Roman', serif;
+  --serif-display: 'Songti SC', 'STSong', 'Times New Roman', serif;
+  --sans: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', -apple-system, sans-serif;
 }
 
 body {
