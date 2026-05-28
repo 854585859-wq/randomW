@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { readData, writeData } from '../utils/data.js';
 import { requireAdmin } from '../middleware/auth.js';
 import { sendFeedbackEmail } from '../utils/mail.js';
+import { supabase } from '../lib/supabase.js';
 
 export const adminRouter = Router();
 
@@ -56,8 +57,8 @@ adminRouter.post('/concerts', requireAdmin, async (req, res) => {
       concerts.push(newConcert);
 
       // Notify subscribers for new concerts
-      const subs = await readData('subscriptions');
-      const matching = subs.filter(s =>
+      const { data: subs } = await supabase.from('subscriptions').select('*');
+      const matching = (subs || []).filter(s =>
         artist.toLowerCase().includes(s.artist.toLowerCase()) ||
         s.artist.toLowerCase().includes(artist.toLowerCase())
       );
@@ -138,8 +139,8 @@ adminRouter.delete('/venues/:id', requireAdmin, async (req, res) => {
 // --- Subscriptions (admin) ---
 adminRouter.get('/subscriptions', requireAdmin, async (_req, res) => {
   try {
-    const subs = await readData('subscriptions');
-    res.json(subs);
+    const { data } = await supabase.from('subscriptions').select('*').order('created_at', { ascending: false });
+    res.json(data || []);
   } catch (err) {
     res.status(500).json({ error: '读取失败' });
   }
@@ -147,9 +148,7 @@ adminRouter.get('/subscriptions', requireAdmin, async (_req, res) => {
 
 adminRouter.delete('/subscriptions/:id', requireAdmin, async (req, res) => {
   try {
-    const subs = await readData('subscriptions');
-    const filtered = subs.filter(s => s.id !== parseInt(req.params.id));
-    await writeData('subscriptions', filtered);
+    await supabase.from('subscriptions').delete().eq('id', req.params.id);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: '删除失败' });

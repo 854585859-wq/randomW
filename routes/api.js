@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { readData, writeData } from '../utils/data.js';
 import { sendFeedbackEmail } from '../utils/mail.js';
+import { supabase } from '../lib/supabase.js';
 
 export const apiRouter = Router();
 
@@ -43,13 +44,13 @@ apiRouter.post('/subscribe', async (req, res) => {
     if (!email || !email.includes('@') || !artist) {
       return res.status(400).json({ error: '邮箱和艺人不能为空' });
     }
-    const subs = await readData('subscriptions');
-    const exists = subs.find(s => s.email === email && s.artist === artist);
-    if (exists) return res.json({ success: true, message: '已订阅' });
-    subs.push({ id: Date.now(), email, artist, createdAt: new Date().toISOString() });
-    await writeData('subscriptions', subs);
+    const { data: existing } = await supabase.from('subscriptions').select('*').eq('email', email).eq('artist', artist);
+    if (existing && existing.length > 0) return res.json({ success: true, message: '已订阅' });
+
+    await supabase.from('subscriptions').insert({ email, artist });
     res.json({ success: true, message: '订阅成功' });
   } catch (err) {
+    console.error('Subscribe error:', err);
     res.status(500).json({ error: '订阅失败' });
   }
 });
