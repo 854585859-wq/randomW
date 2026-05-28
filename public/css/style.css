@@ -29,8 +29,8 @@ a { color: var(--ink); text-decoration: none; }
 /* ---- Top Bar ---- */
 .topbar {
   background-color: var(--paper);
-  background-image: radial-gradient(circle, var(--ink-25) 2.5px, transparent 2.5px);
-  background-size: 20px 20px;
+  background-image: radial-gradient(circle, #d0c8b8 3px, transparent 3px);
+  background-size: 24px 24px;
   border-bottom: 0.5px solid var(--line);
   text-align: center;
 }
