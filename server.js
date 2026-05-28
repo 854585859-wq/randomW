@@ -35,8 +35,23 @@ app.get('/venues', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'v
 app.get('/admin', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'login.html')));
 app.get('/admin/dashboard', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'dashboard.html')));
 
-// 404 for unmatched API routes
+// 404
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found' }));
+
+// Global error handler
+app.use(async (err, _req, res, _next) => {
+  console.error('Server error:', err.message);
+  try {
+    const { sendFeedbackEmail } = await import('./utils/mail.js');
+    sendFeedbackEmail({
+      name: 'System',
+      email: '',
+      message: `Server Error:\n${err.message}\n\nStack:\n${err.stack}`,
+      page: 'error',
+    });
+  } catch {}
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
