@@ -35,8 +35,9 @@
       </div>
     </div>
 
-    <div style="margin-top: 2rem; text-align: center;">
+    <div style="margin-top: 2rem; text-align: center; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
       <button class="btn" id="btnFeedback">提供信息</button>
+      <button class="btn" id="btnSubscribe">订阅艺人</button>
     </div>
 
     <div class="page-footer">
@@ -203,6 +204,28 @@
         f.closest('.modal-overlay').remove();
         alert('提交成功！');
       } catch(err) { alert('提交失败: ' + err.message); }
+    };
+
+    document.getElementById('btnSubscribe').onclick = () => {
+      const artists = [...new Set(allConcerts.map(c => c.artist))].sort();
+      const body = showModal('订阅艺人', '', () => {});
+      body.innerHTML = `
+        <p style="font-size:0.8rem;color:var(--ink-50);margin-bottom:0.8rem;">选择艺人，有新演出时邮件通知你</p>
+        <form id="subForm" onsubmit="submitSubscribe(event)">
+          <div class="form-group"><label>邮箱 *</label><input type="email" name="email" class="form-input" required></div>
+          <div class="form-group"><label>艺人 *</label><select name="artist" class="form-input" required><option value="">— 选择 —</option>${artists.map(a => `<option value="${escHtml(a)}">${escHtml(a)}</option>`).join('')}</select></div>
+          <button type="submit" class="btn btn-primary" style="width:100%">订阅</button>
+        </form>
+      `;
+    };
+    window.submitSubscribe = async function(e) {
+      e.preventDefault();
+      const f = e.target;
+      try {
+        const res = await api('/api/subscribe', { method: 'POST', body: JSON.stringify({ email: f.email.value, artist: f.artist.value }) });
+        f.closest('.modal-overlay').remove();
+        alert(res.message || '订阅成功！');
+      } catch(err) { alert('订阅失败: ' + err.message); }
     };
 
     (async () => { await loadData(); renderVenueButtons(); })();

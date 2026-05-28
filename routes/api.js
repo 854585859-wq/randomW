@@ -36,6 +36,24 @@ apiRouter.get('/venue-bookings', async (req, res) => {
   }
 });
 
+// POST /api/subscribe
+apiRouter.post('/subscribe', async (req, res) => {
+  try {
+    const { email, artist } = req.body;
+    if (!email || !email.includes('@') || !artist) {
+      return res.status(400).json({ error: '邮箱和艺人不能为空' });
+    }
+    const subs = await readData('subscriptions');
+    const exists = subs.find(s => s.email === email && s.artist === artist);
+    if (exists) return res.json({ success: true, message: '已订阅' });
+    subs.push({ id: Date.now(), email, artist, createdAt: new Date().toISOString() });
+    await writeData('subscriptions', subs);
+    res.json({ success: true, message: '订阅成功' });
+  } catch (err) {
+    res.status(500).json({ error: '订阅失败' });
+  }
+});
+
 // POST /api/user-feedback
 apiRouter.post('/user-feedback', async (req, res) => {
   try {

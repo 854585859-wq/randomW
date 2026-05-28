@@ -11,6 +11,7 @@ const FILES = {
   venues: path.join(DATA_DIR, 'venues.json'),
   venueBookings: path.join(DATA_DIR, 'venueBookings.json'),
   users: path.join(DATA_DIR, 'users.json'),
+  subscriptions: path.join(DATA_DIR, 'subscriptions.json'),
 };
 
 export async function initDataFiles() {

@@ -26,6 +26,7 @@
       <div class="tab active" data-tab="concerts">演唱会</div>
       <div class="tab" data-tab="venues">场馆</div>
       <div class="tab" data-tab="bookings">场地档期</div>
+      <div class="tab" data-tab="subscriptions">订阅</div>
     </div>
     <div id="tabContent"></div>
   </div>
@@ -259,6 +260,34 @@
     }
 
     // ============================================================
+    //  SUBSCRIPTIONS
+    // ============================================================
+    async function renderSubscriptions() {
+      let html = '<div class="card"><h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">订阅列表</h3>';
+      try {
+        const subs = await api('/api/admin/subscriptions');
+        if (subs.length === 0) {
+          html += '<div class="empty"><p>暂无订阅</p></div>';
+        } else {
+          html += `<table><thead><tr><th>邮箱</th><th>艺人</th><th>订阅时间</th><th></th></tr></thead><tbody>
+            ${subs.map(s => `<tr>
+              <td>${escHtml(s.email)}</td><td><strong>${escHtml(s.artist)}</strong></td>
+              <td>${new Date(s.createdAt).toLocaleDateString('zh-CN')}</td>
+              <td><button class="btn btn-sm btn-danger" onclick="deleteSub(${s.id})">删除</button></td></tr>`).join('')}
+          </tbody></table>`;
+        }
+      } catch(e) { html += '<div class="empty"><p>加载失败</p></div>'; }
+      html += '</div>';
+      return html;
+    }
+
+    async function deleteSub(id) {
+      if (!confirm('确定删除？')) return;
+      try { await api(`/api/admin/subscriptions/${id}`, { method: 'DELETE' }); loadData(); }
+      catch(err) { alert('删除失败: ' + err.message); }
+    }
+
+    // ============================================================
     //  DATA
     // ============================================================
     async function loadData() {
@@ -268,6 +297,7 @@
       const content = document.getElementById('tabContent');
       if (tab === 'concerts') content.innerHTML = renderConcerts();
       else if (tab === 'venues') content.innerHTML = renderVenues();
+      else if (tab === 'subscriptions') content.innerHTML = await renderSubscriptions();
       else content.innerHTML = renderBookings();
     }
 

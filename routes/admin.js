@@ -153,3 +153,24 @@ adminRouter.delete('/venue-bookings/:id', requireAdmin, async (req, res) => {
     res.status(500).json({ error: '删除失败' });
   }
 });
+
+// --- Subscriptions (admin) ---
+adminRouter.get('/subscriptions', requireAdmin, async (_req, res) => {
+  try {
+    const subs = await readData('subscriptions');
+    res.json(subs);
+  } catch (err) {
+    res.status(500).json({ error: '读取失败' });
+  }
+});
+
+adminRouter.delete('/subscriptions/:id', requireAdmin, async (req, res) => {
+  try {
+    const subs = await readData('subscriptions');
+    const filtered = subs.filter(s => s.id !== parseInt(req.params.id));
+    await writeData('subscriptions', filtered);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: '删除失败' });
+  }
+});
