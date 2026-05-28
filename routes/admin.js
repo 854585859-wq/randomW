@@ -2,6 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { readData, writeData } from '../utils/data.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { sendFeedbackEmail } from '../utils/mail.js';
 
 export const adminRouter = Router();
 
@@ -53,6 +54,25 @@ adminRouter.post('/concerts', requireAdmin, async (req, res) => {
         date, endDate: endDate || null, artist, venueId: parseInt(venueId), venueName, description: description || '',
       };
       concerts.push(newConcert);
+
+      // Notify subscribers for new concerts
+      const subs = await readData('subscriptions');
+      const matching = subs.filter(s =>
+        artist.toLowerCase().includes(s.artist.toLowerCase()) ||
+        s.artist.toLowerCase().includes(artist.toLowerCase())
+      );
+      for (const s of matching) {
+        const dateStr = endDate ? `${date} → ${endDate}` : date;
+        sendFeedbackEmail({
+          name: s.email.split('@')[0],
+          email: s.email,
+          message: `您关注的 ${artist} 有新演出！\n\n日期：${dateStr}\n场馆：${venueName}\n描述：${description || '暂无'}\n\n查看详情：https://concert-kr.space`,
+          page: `subscribe-${artist}`,
+        });
+      }
+      if (matching.length > 0) {
+        console.log(`Sent ${matching.length} subscription emails for ${artist}`);
+      }
     }
     await writeData('concerts', concerts);
     res.json({ success: true });
