@@ -3,7 +3,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.join(__dirname, '..', 'data');
+const SEED_DIR = path.join(__dirname, '..', 'data');
+const DATA_DIR = process.env.VERCEL ? '/tmp/data' : SEED_DIR;
 
 const FILES = {
   concerts: path.join(DATA_DIR, 'concerts.json'),
@@ -13,11 +14,13 @@ const FILES = {
 };
 
 export async function initDataFiles() {
-  try { await fs.mkdir(DATA_DIR, { recursive: true }); } catch {}
+  await fs.mkdir(DATA_DIR, { recursive: true });
+
   for (const [name, filePath] of Object.entries(FILES)) {
     try {
       await fs.access(filePath);
     } catch {
+      // File doesn't exist in DATA_DIR
       if (name === 'users') {
         const bcrypt = (await import('bcryptjs')).default;
         const hash = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'admin123', 10);
@@ -27,7 +30,14 @@ export async function initDataFiles() {
           password: hash,
         }], null, 2));
       } else {
-        await fs.writeFile(filePath, '[]');
+        // Try to copy from seed data (committed files)
+        const seedPath = path.join(SEED_DIR, `${name}.json`);
+        try {
+          const seedData = await fs.readFile(seedPath, 'utf-8');
+          await fs.writeFile(filePath, seedData);
+        } catch {
+          await fs.writeFile(filePath, '[]');
+        }
       }
     }
   }
