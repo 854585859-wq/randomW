@@ -211,9 +211,8 @@
       body.innerHTML = `
         <p style="font-size:0.8rem;color:var(--ink-50);margin-bottom:0.8rem;">填写你想关注的艺人，有新演出时邮件通知</p>
         <form id="subForm" onsubmit="submitSubscribe(event)">
-          <div class="form-group"><label>邮箱 *</label><input type="email" name="email" class="form-input" required placeholder="建议使用 QQ 邮箱"></div>
-          <p style="font-size:0.65rem;color:var(--ink-25);margin-top:0.2rem;">提示：目前仅支持 QQ 邮箱接收通知</p>
-          <div class="form-group"><label>艺人 *</label><input type="text" name="artist" class="form-input" required placeholder="输入想关注的艺人名"></div>
+          <div class="form-group"><label>邮箱 *</label><input type="email" name="email" class="form-input" required></div>
+                    <div class="form-group"><label>艺人 *</label><input type="text" name="artist" class="form-input" required placeholder="输入想关注的艺人名"></div>
           <button type="submit" class="btn btn-primary" style="width:100%">订阅</button>
         </form>
       `;
