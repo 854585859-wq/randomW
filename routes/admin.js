@@ -67,7 +67,7 @@ adminRouter.post('/concerts', requireAdmin, async (req, res) => {
         console.log(`Found ${matching.length} subscribers for ${artist}`);
         for (const s of matching) {
           const dateStr = endDate ? `${date} → ${endDate}` : date;
-          sendSubscriptionEmail({
+          await sendSubscriptionEmail({
             to: s.email,
             artist,
             dateStr,
