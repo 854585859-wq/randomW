@@ -115,45 +115,6 @@ adminRouter.delete('/venues/:id', requireAdmin, async (req, res) => {
   }
 });
 
-// --- Venue Bookings (admin) ---
-adminRouter.post('/venue-bookings', requireAdmin, async (req, res) => {
-  try {
-    const bookings = await readData('venueBookings');
-    const { id, venueId, date, eventName, description } = req.body;
-    if (!eventName || !eventName.trim()) return res.status(400).json({ error: '事件名称不能为空' });
-
-    if (id) {
-      const idx = bookings.findIndex(b => b.id === id);
-      if (idx === -1) return res.status(404).json({ error: '未找到该档期' });
-      bookings[idx] = { id, venueId, date, eventName, description: description || '' };
-    } else {
-      bookings.push({
-        id: nextId(bookings),
-        venueId: parseInt(venueId),
-        date,
-        eventName,
-        description: description || '',
-      });
-    }
-    await writeData('venueBookings', bookings);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: '操作失败' });
-  }
-});
-
-adminRouter.delete('/venue-bookings/:id', requireAdmin, async (req, res) => {
-  try {
-    const bookings = await readData('venueBookings');
-    const filtered = bookings.filter(b => b.id !== parseInt(req.params.id));
-    if (filtered.length === bookings.length) return res.status(404).json({ error: '未找到' });
-    await writeData('venueBookings', filtered);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: '删除失败' });
-  }
-});
-
 // --- Subscriptions (admin) ---
 adminRouter.get('/subscriptions', requireAdmin, async (_req, res) => {
   try {

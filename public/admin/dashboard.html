@@ -25,7 +25,6 @@
     <div class="tabs" style="margin-top:1rem;">
       <div class="tab active" data-tab="concerts">演唱会</div>
       <div class="tab" data-tab="venues">场馆</div>
-      <div class="tab" data-tab="bookings">场地档期</div>
       <div class="tab" data-tab="subscriptions">订阅</div>
     </div>
     <div id="tabContent"></div>
@@ -196,70 +195,6 @@
     }
 
     // ============================================================
-    //  BOOKINGS
-    // ============================================================
-    function renderBookings() {
-      let html = '<div class="card">';
-      html += '<h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">场地档期管理</h3>';
-      html += '<div class="form-group"><label>选择场馆</label><select id="bVenueSelect" class="form-input" style="max-width:320px;">';
-      html += '<option value="">— 请选择 —</option>';
-      allVenues.forEach(v => { html += `<option value="${v.id}">${escHtml(v.name)}</option>`; });
-      html += '</select></div><div id="bookingList"></div>';
-      html += `<div id="bookingFormWrap" style="margin-top:1rem;display:none;">
-        <form id="bookingForm" onsubmit="saveBooking(event)" style="display:flex;gap:0.5rem;align-items:end;flex-wrap:wrap;">
-          <input type="date" id="bDate" class="form-input" required style="max-width:140px;">
-          <input type="text" id="bEvent" class="form-input" required placeholder="事件名称" style="flex:1;min-width:140px;">
-          <input type="text" id="bDesc" class="form-input" placeholder="描述" style="flex:1;min-width:140px;">
-          <button type="submit" class="btn btn-primary">添加</button>
-        </form></div></div>`;
-      return html;
-    }
-
-    async function loadBookings(venueId) {
-      const list = document.getElementById('bookingList');
-      const wrap = document.getElementById('bookingFormWrap');
-      if (!venueId) { list.innerHTML = '<div class="empty"><p>请选择场馆</p></div>'; wrap.style.display = 'none'; return; }
-      wrap.style.display = 'block';
-      try {
-        const bs = await api(`/api/venue-bookings?venueId=${venueId}`);
-        if (bs.length === 0) { list.innerHTML = '<div class="empty"><p>暂无场地档期</p></div>'; }
-        else {
-          list.innerHTML = `<table><thead><tr><th>日期</th><th>事件</th><th>描述</th><th></th></tr></thead><tbody>
-            ${bs.map(b => `<tr>
-              <td>${escHtml(b.date)}</td><td><strong>${escHtml(b.eventName)}</strong></td>
-              <td>${escHtml(b.description || '-')}</td>
-              <td><button class="btn btn-sm btn-danger" onclick="deleteBooking(${b.id})">删除</button></td></tr>`).join('')}
-          </tbody></table>`;
-        }
-      } catch(e) { list.innerHTML = '<div class="empty"><p>加载失败</p></div>'; }
-    }
-
-    document.addEventListener('change', function(e) { if (e.target.id === 'bVenueSelect') loadBookings(e.target.value); });
-
-    async function saveBooking(e) {
-      e.preventDefault();
-      const vid = parseInt(document.getElementById('bVenueSelect').value);
-      if (!vid) return alert('请选择场馆');
-      try {
-        await api('/api/admin/venue-bookings', { method: 'POST', body: JSON.stringify({
-          venueId: vid, date: document.getElementById('bDate').value,
-          eventName: document.getElementById('bEvent').value.trim(),
-          description: document.getElementById('bDesc').value.trim(),
-        })});
-        document.getElementById('bDate').value = ''; document.getElementById('bEvent').value = ''; document.getElementById('bDesc').value = '';
-        loadBookings(vid);
-      } catch(err) { alert('保存失败: ' + err.message); }
-    }
-
-    async function deleteBooking(id) {
-      if (!confirm('确定删除？')) return;
-      try { await api(`/api/admin/venue-bookings/${id}`, { method: 'DELETE' });
-        const vid = document.getElementById('bVenueSelect').value;
-        if (vid) loadBookings(parseInt(vid)); else loadData();
-      } catch(err) { alert('删除失败: ' + err.message); }
-    }
-
-    // ============================================================
     //  SUBSCRIPTIONS
     // ============================================================
     async function renderSubscriptions() {
@@ -298,14 +233,12 @@
       if (tab === 'concerts') content.innerHTML = renderConcerts();
       else if (tab === 'venues') content.innerHTML = renderVenues();
       else if (tab === 'subscriptions') content.innerHTML = await renderSubscriptions();
-      else content.innerHTML = renderBookings();
     }
 
     async function loadTab(tab) {
       editingConcertId = null;
       editingVenueId = null;
       await loadData();
-      if (tab === 'bookings') { const sel = document.getElementById('bVenueSelect'); if (sel) sel.value = ''; }
     }
 
     checkAuth().then(() => loadData());
