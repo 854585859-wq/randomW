@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理后台 · Concert Info</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/" class="topbar-logo">Concert Info</a>
+      <nav class="topbar-links">
+        <a href="/">日历</a>
+        <a href="/venues">场馆</a>
+        <button class="btn btn-sm" onclick="logout()" style="font-size:0.68rem;">登出</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="tabs" style="margin-top:1rem;">
+      <div class="tab active" data-tab="concerts">演唱会</div>
+      <div class="tab" data-tab="venues">场馆</div>
+      <div class="tab" data-tab="bookings">场地档期</div>
+    </div>
+    <div id="tabContent"></div>
+  </div>
+
+  <script src="/js/utils.js"></script>
+  <script>
+    // --- Auth ---
+    async function checkAuth() {
+      try { const d = await api('/api/admin/check'); if (!d.loggedIn) location.href = '/admin'; }
+      catch(e) { location.href = '/admin'; }
+    }
+
+    async function logout() {
+      await api('/api/admin/logout', { method: 'POST' });
+      location.href = '/admin';
+    }
+
+    // --- State ---
+    let allVenues = [], allConcerts = [];
+    let editingConcertId = null;
+    let editingVenueId = null;
+
+    // --- Tabs ---
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.onclick = function() {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        loadTab(this.dataset.tab);
+      };
+    });
+
+    // ============================================================
+    //  CONCERTS
+    // ============================================================
+    function renderConcerts() {
+      const vm = {}; allVenues.forEach(v => vm[v.id] = v.name);
+      let html = '';
+
+      const editing = editingConcertId ? allConcerts.find(c => c.id === editingConcertId) : null;
+
+      if (allConcerts.length === 0) {
+        html += '<div class="empty"><div class="empty-icon">🎤</div><p>暂无演唱会</p></div>';
+      } else {
+        html += '<div class="table-wrap"><table><thead><tr><th>日期</th><th>艺人</th><th>场馆</th><th>描述</th><th></th></tr></thead><tbody>';
+        allConcerts.forEach(c => {
+          html += `<tr>
+            <td>${c.endDate ? escHtml(c.date) + ' → ' + escHtml(c.endDate) : escHtml(c.date)}</td>
+            <td><strong>${escHtml(c.artist)}</strong></td>
+            <td>${escHtml(vm[c.venueId] || c.venueName)}</td>
+            <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(c.description || '-')}</td>
+            <td style="white-space:nowrap;">
+              <button class="btn btn-sm" onclick="startEditConcert(${c.id})">编辑</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteConcert(${c.id})">删除</button></td></tr>`;
+        });
+        html += '</tbody></table></div>';
+      }
+
+      // Form
+      html += `<div class="card" style="margin-top:1.25rem;">
+        <h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">${editing ? '编辑演唱会' : '添加演唱会'}</h3>
+        <form id="concertForm" onsubmit="saveConcert(event)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div class="form-group"><label>开始日期</label><input type="date" id="cDate" class="form-input" required value="${editing?.date || ''}"></div>
+            <div class="form-group"><label>结束日期（可空）</label><input type="date" id="cEndDate" class="form-input" value="${editing?.endDate || ''}"></div>
+            <div class="form-group"><label>艺人</label><input type="text" id="cArtist" class="form-input" required value="${escHtml(editing?.artist || '')}"></div>
+            <div class="form-group"><label>场馆</label><select id="cVenue" class="form-input" required>
+              <option value="">— 选择 —</option>
+              ${allVenues.map(v => `<option value="${v.id}" ${editing?.venueId === v.id ? 'selected' : ''}>${escHtml(v.name)}</option>`).join('')}
+            </select></div>
+            <div class="form-group"><label>描述</label><input type="text" id="cDesc" class="form-input" value="${escHtml(editing?.description || '')}"></div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top:0.75rem;">${editing ? '更新' : '添加'}</button>
+          ${editing ? '<button type="button" class="btn" onclick="cancelEditConcert()" style="margin-top:0.75rem;margin-left:0.4rem;">取消</button>' : ''}
+        </form></div>`;
+
+      return html;
+    }
+
+    window.startEditConcert = function(id) {
+      editingConcertId = id;
+      loadData();
+    };
+
+    window.cancelEditConcert = function() {
+      editingConcertId = null;
+      loadData();
+    };
+
+    async function saveConcert(e) {
+      e.preventDefault();
+      const venueId = parseInt(document.getElementById('cVenue').value);
+      const venue = allVenues.find(v => v.id === venueId);
+      try {
+        await api('/api/admin/concerts', { method: 'POST', body: JSON.stringify({
+          id: editingConcertId,
+          date: document.getElementById('cDate').value,
+          endDate: document.getElementById('cEndDate').value || null,
+          artist: document.getElementById('cArtist').value.trim(),
+          venueId, venueName: venue?.name || '',
+          description: document.getElementById('cDesc').value.trim(),
+        })});
+        editingConcertId = null;
+        loadData();
+      } catch(err) { alert('保存失败: ' + err.message); }
+    }
+
+    async function deleteConcert(id) {
+      if (!confirm('确定删除？')) return;
+      try { await api(`/api/admin/concerts/${id}`, { method: 'DELETE' }); loadData(); }
+      catch(err) { alert('删除失败: ' + err.message); }
+    }
+
+    // ============================================================
+    //  VENUES
+    // ============================================================
+    function renderVenues() {
+      let html = allVenues.length === 0
+        ? '<div class="alert alert-info">暂无场馆，请先添加场馆。</div>' : '';
+      html += '<div class="card">';
+      html += '<h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">场馆列表</h3>';
+      if (allVenues.length > 0) {
+        html += '<table><thead><tr><th>ID</th><th>名称</th><th></th></tr></thead><tbody>';
+        allVenues.forEach(v => {
+          html += `<tr>
+            <td>${v.id}</td><td><strong>${escHtml(v.name)}</strong></td>
+            <td><button class="btn btn-sm" onclick="startEditVenue(${v.id})">编辑</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteVenue(${v.id})">删除</button></td></tr>`;
+        });
+        html += '</tbody></table>';
+      }
+
+      const ev = editingVenueId ? allVenues.find(v => v.id === editingVenueId) : null;
+      html += `<form id="venueForm" onsubmit="saveVenue(event)" style="margin-top:1rem;display:flex;gap:0.5rem;align-items:end;">
+        <div class="form-group" style="flex:1;margin-bottom:0;">
+          <label>场馆名称</label><input type="text" id="vName" class="form-input" required value="${escHtml(ev?.name || '')}">
+        </div>
+        <button type="submit" class="btn btn-primary">${ev ? '更新' : '添加'}</button>
+        ${ev ? '<button type="button" class="btn" onclick="cancelEditVenue()">取消</button>' : ''}
+      </form></div>`;
+      return html;
+    }
+
+    window.startEditVenue = function(id) {
+      editingVenueId = id;
+      loadData();
+    };
+    window.cancelEditVenue = function() {
+      editingVenueId = null;
+      loadData();
+    };
+
+    async function saveVenue(e) {
+      e.preventDefault();
+      try {
+        await api('/api/admin/venues', { method: 'POST', body: JSON.stringify({
+          id: editingVenueId, name: document.getElementById('vName').value.trim(),
+        })});
+        editingVenueId = null;
+        loadData();
+      } catch(err) { alert('保存失败: ' + err.message); }
+    }
+
+    async function deleteVenue(id) {
+      if (!confirm('确定删除？有关联数据则无法删除。')) return;
+      try { await api(`/api/admin/venues/${id}`, { method: 'DELETE' }); loadData(); }
+      catch(err) { alert('删除失败: ' + err.message); }
+    }
+
+    // ============================================================
+    //  BOOKINGS
+    // ============================================================
+    function renderBookings() {
+      let html = '<div class="card">';
+      html += '<h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">场地档期管理</h3>';
+      html += '<div class="form-group"><label>选择场馆</label><select id="bVenueSelect" class="form-input" style="max-width:320px;">';
+      html += '<option value="">— 请选择 —</option>';
+      allVenues.forEach(v => { html += `<option value="${v.id}">${escHtml(v.name)}</option>`; });
+      html += '</select></div><div id="bookingList"></div>';
+      html += `<div id="bookingFormWrap" style="margin-top:1rem;display:none;">
+        <form id="bookingForm" onsubmit="saveBooking(event)" style="display:flex;gap:0.5rem;align-items:end;flex-wrap:wrap;">
+          <input type="date" id="bDate" class="form-input" required style="max-width:140px;">
+          <input type="text" id="bEvent" class="form-input" required placeholder="事件名称" style="flex:1;min-width:140px;">
+          <input type="text" id="bDesc" class="form-input" placeholder="描述" style="flex:1;min-width:140px;">
+          <button type="submit" class="btn btn-primary">添加</button>
+        </form></div></div>`;
+      return html;
+    }
+
+    async function loadBookings(venueId) {
+      const list = document.getElementById('bookingList');
+      const wrap = document.getElementById('bookingFormWrap');
+      if (!venueId) { list.innerHTML = '<div class="empty"><p>请选择场馆</p></div>'; wrap.style.display = 'none'; return; }
+      wrap.style.display = 'block';
+      try {
+        const bs = await api(`/api/venue-bookings?venueId=${venueId}`);
+        if (bs.length === 0) { list.innerHTML = '<div class="empty"><p>暂无场地档期</p></div>'; }
+        else {
+          list.innerHTML = `<table><thead><tr><th>日期</th><th>事件</th><th>描述</th><th></th></tr></thead><tbody>
+            ${bs.map(b => `<tr>
+              <td>${escHtml(b.date)}</td><td><strong>${escHtml(b.eventName)}</strong></td>
+              <td>${escHtml(b.description || '-')}</td>
+              <td><button class="btn btn-sm btn-danger" onclick="deleteBooking(${b.id})">删除</button></td></tr>`).join('')}
+          </tbody></table>`;
+        }
+      } catch(e) { list.innerHTML = '<div class="empty"><p>加载失败</p></div>'; }
+    }
+
+    document.addEventListener('change', function(e) { if (e.target.id === 'bVenueSelect') loadBookings(e.target.value); });
+
+    async function saveBooking(e) {
+      e.preventDefault();
+      const vid = parseInt(document.getElementById('bVenueSelect').value);
+      if (!vid) return alert('请选择场馆');
+      try {
+        await api('/api/admin/venue-bookings', { method: 'POST', body: JSON.stringify({
+          venueId: vid, date: document.getElementById('bDate').value,
+          eventName: document.getElementById('bEvent').value.trim(),
+          description: document.getElementById('bDesc').value.trim(),
+        })});
+        document.getElementById('bDate').value = ''; document.getElementById('bEvent').value = ''; document.getElementById('bDesc').value = '';
+        loadBookings(vid);
+      } catch(err) { alert('保存失败: ' + err.message); }
+    }
+
+    async function deleteBooking(id) {
+      if (!confirm('确定删除？')) return;
+      try { await api(`/api/admin/venue-bookings/${id}`, { method: 'DELETE' });
+        const vid = document.getElementById('bVenueSelect').value;
+        if (vid) loadBookings(parseInt(vid)); else loadData();
+      } catch(err) { alert('删除失败: ' + err.message); }
+    }
+
+    // ============================================================
+    //  DATA
+    // ============================================================
+    async function loadData() {
+      try { allConcerts = await api('/api/concerts'); } catch(e) { allConcerts = []; }
+      try { allVenues = await api('/api/venues'); } catch(e) { allVenues = []; }
+      const tab = document.querySelector('.tab.active')?.dataset.tab || 'concerts';
+      const content = document.getElementById('tabContent');
+      if (tab === 'concerts') content.innerHTML = renderConcerts();
+      else if (tab === 'venues') content.innerHTML = renderVenues();
+      else content.innerHTML = renderBookings();
+    }
+
+    async function loadTab(tab) {
+      editingConcertId = null;
+      editingVenueId = null;
+      await loadData();
+      if (tab === 'bookings') { const sel = document.getElementById('bVenueSelect'); if (sel) sel.value = ''; }
+    }
+
+    checkAuth().then(() => loadData());
+  </script>
+</body>
+</html>

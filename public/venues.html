@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>场馆档期 · Concert Info</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/" class="topbar-logo">Concert Info</a>
+      <div class="topbar-subtitle">Korea Concert Calendar</div>
+      <div class="topbar-divider"></div>
+      <nav class="topbar-links">
+        <a href="/">日历</a>
+        <a href="/venues" class="active">场馆</a>
+        <a href="/admin">管理</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <h2 class="section-title">场馆档期</h2>
+
+    <div class="form-group">
+      <label>选择场馆</label>
+      <div id="venueButtons" class="venue-btn-group"></div>
+    </div>
+
+    <div id="scheduleArea">
+      <div class="empty">
+        <div class="empty-icon">📍</div>
+        <p>请选择场馆查看档期</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 2rem; text-align: center;">
+      <button class="btn" id="btnFeedback">提供信息</button>
+    </div>
+
+    <div class="page-footer">
+      <p class="footer-social">
+        Made by <a href="https://www.xiaohongshu.com/user/profile/598f023050c4b47b85942c85" target="_blank">@-WANGTT-</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="/js/utils.js"></script>
+  <script>
+    const DAYS = ['日', '一', '二', '三', '四', '五', '六'];
+    const VENUE_COLORS = ['#c4875c','#8b9a8b','#9b8a7a','#b8946e','#7a8a8b','#a08b7c'];
+    let allVenues = [], allConcerts = [], allBookings = [];
+    let activeVenueId = null;
+    let currentYear, currentMonth;
+    const now = new Date();
+    currentYear = now.getFullYear();
+    currentMonth = now.getMonth();
+
+    async function loadData() {
+      try { allVenues = await api('/api/venues'); } catch(e) { allVenues = []; }
+      try { allConcerts = await api('/api/concerts'); } catch(e) { allConcerts = []; }
+    }
+
+    function getVenueColor(venueId) {
+      const idx = allVenues.findIndex(v => v.id === venueId);
+      return VENUE_COLORS[idx % VENUE_COLORS.length];
+    }
+
+    function renderVenueButtons() {
+      const container = document.getElementById('venueButtons');
+      if (allVenues.length === 0) {
+        container.innerHTML = '<p style="color:var(--ink-30);font-size:0.8rem;">暂无场馆</p>';
+        return;
+      }
+      container.innerHTML = allVenues.map(v => {
+        const c = getVenueColor(v.id);
+        const active = activeVenueId === v.id;
+        return `<button class="btn btn-sm venue-btn"
+          style="${active ? 'background:'+c+';border-color:'+c+';color:#fff;' : 'border-color:'+c+';color:'+c+';'}"
+          onclick="selectVenue(${v.id})">${escHtml(v.name)}</button>`;
+      }).join('');
+    }
+
+    function selectVenue(venueId) {
+      activeVenueId = venueId;
+      currentYear = now.getFullYear();
+      currentMonth = now.getMonth();
+      renderVenueButtons();
+      renderVenueCalendar();
+    }
+
+    function concertOnDate(c, dateKey) {
+      if (c.date === dateKey) return true;
+      if (c.endDate && c.date <= dateKey && dateKey <= c.endDate) return true;
+      return false;
+    }
+
+    function renderVenueCalendar() {
+      const area = document.getElementById('scheduleArea');
+      const venue = allVenues.find(v => v.id === activeVenueId);
+      if (!venue) {
+        area.innerHTML = '<div class="empty"><div class="empty-icon">📍</div><p>请选择场馆查看档期</p></div>';
+        return;
+      }
+
+      const venueColor = getVenueColor(venue.id);
+      const venueConcerts = allConcerts.filter(c => c.venueId === venue.id);
+
+      let html = `<div class="calendar-header">
+        <h2>${escHtml(venue.name)} · ${currentYear}.${String(currentMonth+1).padStart(2,'0')}</h2>
+        <div>
+          <button class="btn btn-sm" onclick="changeMonth(-1)">‹</button>
+          <button class="btn btn-sm" onclick="changeMonth(1)">›</button>
+        </div>
+      </div>`;
+
+      html += '<div class="calendar-grid">';
+      html += DAYS.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
+
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+      // Prev month
+      for (let i = firstDay - 1; i >= 0; i--) {
+        const d = daysInPrevMonth - i;
+        const mm = currentMonth === 0 ? 12 : currentMonth;
+        const yy = currentMonth === 0 ? currentYear - 1 : currentYear;
+        const key = `${yy}-${String(mm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        html += `<div class="calendar-cell other-month"><div class="day-num">${d}</div>${renderEvents(key, venueConcerts, venueColor)}</div>`;
+      }
+
+      // Current month
+      for (let d = 1; d <= daysInMonth; d++) {
+        const key = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const todayKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        html += `<div class="calendar-cell${key === todayKey ? ' today' : ''}"><div class="day-num">${d}</div>${renderEvents(key, venueConcerts, venueColor)}</div>`;
+      }
+
+      // Fill remaining
+      const total = firstDay + daysInMonth;
+      const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
+      for (let d = 1; d <= rem; d++) {
+        const nm = currentMonth + 2 > 12 ? 1 : currentMonth + 2;
+        const ny = nm === 1 ? currentYear + 1 : currentYear;
+        const key = `${ny}-${String(nm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        html += `<div class="calendar-cell other-month"><div class="day-num">${d}</div>${renderEvents(key, venueConcerts, venueColor)}</div>`;
+      }
+
+      html += '</div>';
+      area.innerHTML = html;
+    }
+
+    function renderEvents(dateKey, concerts, color) {
+      return concerts.filter(c => concertOnDate(c, dateKey)).map(c => `
+        <div class="calendar-event" style="border-left:2px solid ${color};background:${color}15;"
+          onclick="event.stopPropagation();showDetail(${c.id})">${escHtml(c.artist)}</div>
+      `).join('');
+    }
+
+    function showDetail(id) {
+      const c = allConcerts.find(x => x.id === id);
+      if (!c) return;
+      const dateRange = c.endDate ? `${c.date} → ${c.endDate}` : c.date;
+      const body = showModal(c.artist, '');
+      body.innerHTML = `
+        <div style="line-height:2;font-weight:300;">
+          <p><span style="color:var(--ink-30);font-size:0.75rem;">日期</span><br>${escHtml(dateRange)}</p>
+          <p style="margin-top:0.4rem;"><span style="color:var(--ink-30);font-size:0.75rem;">场馆</span><br>${escHtml(c.venueName)}</p>
+          <p style="margin-top:0.6rem;font-size:0.85rem;">${escHtml(c.description || '暂无详情')}</p>
+        </div>
+      `;
+    }
+
+    function changeMonth(delta) {
+      currentMonth += delta;
+      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      renderVenueCalendar();
+    }
+
+    document.getElementById('btnFeedback').onclick = () => {
+      const body = showModal('提供信息', '', () => {});
+      body.innerHTML = `
+        <form id="fbForm" onsubmit="submitFeedback(event)">
+          <div class="form-group"><label>姓名</label><input type="text" name="name" class="form-input"></div>
+          <div class="form-group"><label>邮箱</label><input type="email" name="email" class="form-input"></div>
+          <div class="form-group"><label>内容</label><textarea name="message" class="form-input" rows="4" required></textarea></div>
+          <button type="submit" class="btn btn-primary" style="width:100%">提交</button>
+        </form>
+      `;
+    };
+
+    window.submitFeedback = async function(e) {
+      e.preventDefault();
+      const f = e.target;
+      try {
+        await api('/api/user-feedback', {
+          method: 'POST',
+          body: JSON.stringify({ name: f.name.value, email: f.email.value, message: f.message.value, page: 'venues' }),
+        });
+        f.closest('.modal-overlay').remove();
+        alert('提交成功！');
+      } catch(err) { alert('提交失败: ' + err.message); }
+    };
+
+    (async () => { await loadData(); renderVenueButtons(); })();
+  </script>
+</body>
+</html>

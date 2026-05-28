@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理后台 · Concert Info</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="login-page">
+  <div class="login-card">
+    <h1>Concert Info</h1>
+    <p class="topbar-subtitle" style="text-align:center;margin-bottom:1.5rem;">Admin</p>
+    <form id="loginForm">
+      <div class="form-group">
+        <label>用户名</label>
+        <input type="text" name="username" class="form-input" required autofocus>
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" name="password" class="form-input" required>
+      </div>
+      <div id="loginError" style="color:#d65a5a;font-size:0.78rem;margin-bottom:0.75rem;"></div>
+      <button type="submit" class="btn btn-primary" style="width:100%">登录</button>
+    </form>
+    <p style="text-align:center;margin-top:1rem;font-size:0.73rem;color:var(--ink-30);">
+      <a href="/" style="color:var(--ink-30);">← 返回首页</a>
+    </p>
+  </div>
+
+  <script src="/js/utils.js"></script>
+  <script>
+    api('/api/admin/check').then(d => { if (d.loggedIn) location.href = '/admin/dashboard'; }).catch(() => {});
+    document.getElementById('loginForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const errEl = document.getElementById('loginError');
+      errEl.textContent = '';
+      try {
+        await api('/api/admin/login', {
+          method: 'POST',
+          body: JSON.stringify({ username: this.username.value, password: this.password.value }),
+        });
+        location.href = '/admin/dashboard';
+      } catch(err) { errEl.textContent = err.message; }
+    };
+  </script>
+</body>
+</html>
