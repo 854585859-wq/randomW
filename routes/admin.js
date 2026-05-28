@@ -67,12 +67,13 @@ adminRouter.post('/concerts', requireAdmin, async (req, res) => {
         sendFeedbackEmail({
           name: s.email.split('@')[0],
           email: s.email,
-          message: `您关注的 ${artist} 有新演出！\n\n日期：${dateStr}\n场馆：${venueName}\n描述：${description || '暂无'}\n\n查看详情：https://concert-kr.space`,
+          message: `您关注的 ${artist} 有新演出！\n\n日期：${dateStr}\n场馆：${venueName}\n描述：${description || '暂无'}\n\n查看详情：https://concert-kr.space\n\n——\n本次推送为一次性通知。如需继续接收 ${artist} 或其他艺人的最新演出信息，请前往 https://concert-kr.space 重新订阅。`,
           page: `subscribe-${artist}`,
         });
       }
       if (matching.length > 0) {
-        console.log(`Sent ${matching.length} subscription emails for ${artist}`);
+        await supabase.from('subscriptions').delete().in('id', matching.map(s => s.id));
+        console.log(`Sent ${matching.length} subscription emails for ${artist} (subscriptions cleared)`);
       }
     }
     await writeData('concerts', concerts);
