@@ -207,13 +207,12 @@
     };
 
     document.getElementById('btnSubscribe').onclick = () => {
-      const artists = [...new Set(allConcerts.map(c => c.artist))].sort();
       const body = showModal('订阅艺人', '', () => {});
       body.innerHTML = `
-        <p style="font-size:0.8rem;color:var(--ink-50);margin-bottom:0.8rem;">选择艺人，有新演出时邮件通知你</p>
+        <p style="font-size:0.8rem;color:var(--ink-50);margin-bottom:0.8rem;">填写你想关注的艺人，有新演出时邮件通知</p>
         <form id="subForm" onsubmit="submitSubscribe(event)">
           <div class="form-group"><label>邮箱 *</label><input type="email" name="email" class="form-input" required></div>
-          <div class="form-group"><label>艺人 *</label><select name="artist" class="form-input" required><option value="">— 选择 —</option>${artists.map(a => `<option value="${escHtml(a)}">${escHtml(a)}</option>`).join('')}</select></div>
+          <div class="form-group"><label>艺人 *</label><input type="text" name="artist" class="form-input" required placeholder="输入想关注的艺人名"></div>
           <button type="submit" class="btn btn-primary" style="width:100%">订阅</button>
         </form>
       `;
