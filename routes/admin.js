@@ -2,7 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { readData, writeData } from '../utils/data.js';
 import { requireAdmin } from '../middleware/auth.js';
-import { sendFeedbackEmail } from '../utils/mail.js';
+import { sendSubscriptionEmail } from '../utils/mail.js';
 import { supabase } from '../lib/supabase.js';
 
 export const adminRouter = Router();
@@ -64,11 +64,12 @@ adminRouter.post('/concerts', requireAdmin, async (req, res) => {
       );
       for (const s of matching) {
         const dateStr = endDate ? `${date} → ${endDate}` : date;
-        sendFeedbackEmail({
-          name: s.email.split('@')[0],
-          email: s.email,
-          message: `您关注的 ${artist} 有新演出！\n\n日期：${dateStr}\n场馆：${venueName}\n描述：${description || '暂无'}\n\n查看详情：https://concert-kr.space\n\n——\n本次推送为一次性通知。如需继续接收 ${artist} 或其他艺人的最新演出信息，请前往 https://concert-kr.space 重新订阅。`,
-          page: `subscribe-${artist}`,
+        sendSubscriptionEmail({
+          to: s.email,
+          artist,
+          dateStr,
+          venueName,
+          description: description || '',
         });
       }
       if (matching.length > 0) {

@@ -56,3 +56,37 @@ ${message}
     console.error('Failed to send feedback email:', err.message);
   }
 }
+
+export async function sendSubscriptionEmail({ to, artist, dateStr, venueName, description }) {
+  const t = getTransporter();
+  const body = `您关注的 ${artist} 有新演出！
+
+日期：${dateStr}
+场馆：${venueName}
+描述：${description || '暂无'}
+
+查看详情：https://concert-kr.space
+
+——
+本次推送为一次性通知。如需继续接收 ${artist} 或其他艺人的最新演出信息，请前往 https://concert-kr.space 重新订阅。`;
+
+  if (!t) {
+    console.log('--- Subscription email would be sent ---');
+    console.log('To:', to);
+    console.log(body);
+    console.log('--- End ---');
+    return;
+  }
+
+  try {
+    await t.sendMail({
+      from: process.env.SMTP_USER,
+      to,
+      subject: `[Concert Info] ${artist} 新演出通知`,
+      text: body,
+    });
+    console.log('Subscription email sent to', to);
+  } catch (err) {
+    console.error('Failed to send subscription email:', err.message);
+  }
+}
