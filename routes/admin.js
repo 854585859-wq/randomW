@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { readData, writeData } from '../utils/data.js';
 import { requireAdmin } from '../middleware/auth.js';
 

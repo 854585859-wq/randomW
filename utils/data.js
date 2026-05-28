@@ -19,7 +19,7 @@ export async function initDataFiles() {
       await fs.access(filePath);
     } catch {
       if (name === 'users') {
-        const bcrypt = (await import('bcrypt')).default;
+        const bcrypt = (await import('bcryptjs')).default;
         const hash = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'admin123', 10);
         await fs.writeFile(filePath, JSON.stringify([{
           id: 1,
