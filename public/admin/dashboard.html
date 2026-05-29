@@ -28,6 +28,12 @@
       <div class="tab" data-tab="stats">统计</div>
       <div class="tab" data-tab="subscriptions">订阅</div>
     </div>
+    <div id="quickAdd" style="margin-bottom:1rem;display:none;">
+      <form onsubmit="quickAddConcert(event)" style="display:flex;gap:0.5rem;">
+        <input type="text" id="qaInput" class="form-input" placeholder="艺人 @ 场馆 日期 → 结束日期  (例: SEVENTEEN @ KSPO DOME 2026-07-20 → 2026-07-22)" style="flex:1;">
+        <button type="submit" class="btn btn-primary">快速添加</button>
+      </form>
+    </div>
     <div id="tabContent"></div>
   </div>
 
@@ -48,6 +54,53 @@
     let allVenues = [], allConcerts = [];
     let editingConcertId = null;
     let editingVenueId = null;
+
+    // Quick add
+    function quickAddConcert(e) {
+      e.preventDefault();
+      const input = document.getElementById('qaInput').value.trim();
+      if (!input) return;
+
+      // Parse: ARTIST @ VENUE DATE [→ END_DATE]
+      const parts = input.split('@');
+      if (parts.length < 2) return alert('格式：艺人 @ 场馆 日期');
+      const artist = parts[0].trim();
+      const rest = parts[1].trim();
+
+      // Split venue and dates
+      let venueName = '', dateStr = '', endDateStr = '';
+      const dateSplit = rest.split('→').map(s => s.trim());
+      const venueAndDate = dateSplit[0];
+      if (dateSplit.length > 1) endDateStr = dateSplit[1];
+
+      // Find venue that matches the end of venueAndDate
+      for (const v of allVenues) {
+        if (venueAndDate.toLowerCase().includes(v.name.toLowerCase())) {
+          venueName = v.name;
+          dateStr = venueAndDate.slice(venueAndDate.toLowerCase().indexOf(v.name.toLowerCase()) + v.name.length).trim();
+          break;
+        }
+      }
+
+      // Normalize dates
+      dateStr = dateStr.replace(/\//g, '-').replace(/\./g, '-');
+      endDateStr = endDateStr.replace(/\//g, '-').replace(/\./g, '-');
+
+      // Find venue
+      const venue = allVenues.find(v => v.name === venueName);
+      if (!venue) return alert('场馆未找到："' + venueName + '"');
+      if (!dateStr) return alert('请提供日期');
+
+      // Fill form
+      document.getElementById('cDate').value = dateStr;
+      document.getElementById('cEndDate').value = endDateStr || '';
+      document.getElementById('cArtist').value = artist;
+      document.getElementById('cVenue').value = venue.id;
+      document.getElementById('qaInput').value = '';
+
+      // Scroll to form
+      document.getElementById('concertForm')?.scrollIntoView({ behavior: 'smooth' });
+    }
 
     // --- Tabs ---
     document.querySelectorAll('.tab').forEach(tab => {
@@ -258,6 +311,7 @@
       try { allConcerts = await api('/api/concerts'); } catch(e) { allConcerts = []; }
       try { allVenues = await api('/api/venues'); } catch(e) { allVenues = []; }
       const tab = document.querySelector('.tab.active')?.dataset.tab || 'concerts';
+      document.getElementById('quickAdd').style.display = tab === 'concerts' ? 'block' : 'none';
       const content = document.getElementById('tabContent');
       if (tab === 'concerts') content.innerHTML = renderConcerts();
       else if (tab === 'venues') content.innerHTML = renderVenues();
