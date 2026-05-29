@@ -54,6 +54,8 @@
     let allVenues = [], allConcerts = [];
     let editingConcertId = null;
     let editingVenueId = null;
+    let concertVenueFilter = null;
+    let showExpired = false;
 
     // Quick add
     function quickAddConcert(e) {
@@ -115,26 +117,47 @@
     //  CONCERTS
     // ============================================================
     function renderConcerts() {
-      const vm = {}; allVenues.forEach(v => vm[v.id] = v.name);
-      let html = '';
-
       const editing = editingConcertId ? allConcerts.find(c => c.id === editingConcertId) : null;
+      let html = '';
 
       if (allConcerts.length === 0) {
         html += '<div class="empty"><div class="empty-icon">🎤</div><p>暂无演唱会</p></div>';
       } else {
-        // Group by venueId, sort by date within each group
+        // Venue sub-tabs
+        html += '<div class="tabs" style="margin-bottom:0.8rem;">';
+        html += `<div class="tab ${concertVenueFilter === null ? 'active' : ''}" onclick="setVenueFilter(null)">全部</div>`;
+        allVenues.forEach(v => {
+          html += `<div class="tab ${concertVenueFilter === v.id ? 'active' : ''}" onclick="setVenueFilter(${v.id})">${escHtml(v.name)}</div>`;
+        });
+        html += '</div>';
+
+        // Filtered concerts
+        const today = new Date().toISOString().split('T')[0];
+        let filtered = concertVenueFilter ? allConcerts.filter(c => c.venue_id === concertVenueFilter) : allConcerts;
+        if (!showExpired) filtered = filtered.filter(c => (c.end_date || c.date) >= today);
+        const totalCount = allConcerts.length;
+        const activeCount = allConcerts.filter(c => (c.end_date || c.date) >= today).length;
         const grouped = {};
-        allConcerts.forEach(c => {
+        filtered.forEach(c => {
           const vId = c.venue_id;
           if (!grouped[vId]) grouped[vId] = [];
           grouped[vId].push(c);
         });
         Object.values(grouped).forEach(arr => arr.sort((a, b) => a.date.localeCompare(b.date)));
 
+        html += `<p style="font-size:0.7rem;color:var(--ink-25);margin-bottom:0.5rem;">
+          ${activeCount} 场进行中 · ${totalCount - activeCount} 场已过期
+          ${(totalCount - activeCount) > 0 ? `<a href="#" onclick="toggleExpired(event)" style="color:var(--ink-50);">${showExpired ? '隐藏过期' : '显示过期'}</a>` : ''}
+        </p>`;
+
+        if (filtered.length === 0) {
+          html += '<div class="empty"><p>暂无演唱会</p></div>';
+        }
         for (const [vId, concerts] of Object.entries(grouped)) {
           const vName = concerts[0].venue_name;
-          html += `<h3 style="font-family:var(--serif);font-weight:400;font-size:0.9rem;margin:1rem 0 0.4rem;color:var(--ink-50);">${escHtml(vName)} · ${concerts.length} 场</h3>`;
+          if (!concertVenueFilter) {
+            html += `<h3 style="font-family:var(--serif);font-weight:400;font-size:0.9rem;margin:0.5rem 0 0.3rem;color:var(--ink-50);">${escHtml(vName)} · ${concerts.length} 场</h3>`;
+          }
           html += '<div class="table-wrap"><table><thead><tr><th>日期</th><th>艺人</th><th>描述</th><th></th></tr></thead><tbody>';
           concerts.forEach(c => {
             html += `<tr>
@@ -172,6 +195,17 @@
 
     window.startEditConcert = function(id) {
       editingConcertId = id;
+      loadData();
+    };
+
+    window.toggleExpired = function(e) {
+      e.preventDefault();
+      showExpired = !showExpired;
+      loadData();
+    };
+
+    window.setVenueFilter = function(venueId) {
+      concertVenueFilter = venueId;
       loadData();
     };
 
