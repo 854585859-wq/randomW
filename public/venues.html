@@ -91,6 +91,8 @@
       currentMonth = now.getMonth();
       renderVenueButtons();
       renderVenueCalendar();
+      // Track venue-specific visit
+      fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: 'venue/' + venueId }) }).catch(() => {});
     }
 
     function concertOnDate(c, dateKey) {

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { readData, writeData } from '../utils/data.js';
 import { sendFeedbackEmail } from '../utils/mail.js';
 import { supabase } from '../lib/supabase.js';
+import { verify, COOKIE_NAME } from '../middleware/auth.js';
 
 export const apiRouter = Router();
 
@@ -40,7 +41,11 @@ apiRouter.get('/venue-bookings', async (req, res) => {
 // POST /api/track
 apiRouter.post('/track', async (req, res) => {
   try {
-    await supabase.from('page_views').insert({ path: req.body.path || '/' });
+    const token = req.cookies?.[COOKIE_NAME];
+    if (!token || !verify(token)) {
+      await supabase.from('page_views').insert({ path: req.body.path || '/' });
+    }
+    // Admin visits are silently skipped
   } catch (err) {}
   res.json({ success: true });
 });

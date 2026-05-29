@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 
 const SECRET = process.env.SESSION_SECRET || 'dev-secret';
-const COOKIE_NAME = 'admin_token';
+export const COOKIE_NAME = 'admin_token';
 const MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 function sign(data) {
@@ -10,7 +10,7 @@ function sign(data) {
   return `${payload}:${hash}`;
 }
 
-function verify(token) {
+export function verify(token) {
   try {
     const parts = token.split(':');
     const hash = parts.pop();

@@ -144,11 +144,31 @@ adminRouter.post('/venues/reorder', requireAdmin, async (req, res) => {
 // --- Stats (admin) ---
 adminRouter.get('/stats', requireAdmin, async (_req, res) => {
   try {
-    const { data: all } = await supabase.from('page_views').select('created_at');
+    const { data: all } = await supabase.from('page_views').select('*');
     const total = all ? all.length : 0;
     const today = new Date().toISOString().split('T')[0];
     const todayViews = all ? all.filter(v => v.created_at.startsWith(today)).length : 0;
-    res.json({ total, today: todayViews });
+
+    // Venue visit popularity: count page_views by venue
+    const venueVisitMap = {};
+    (all || []).forEach(v => {
+      const match = v.path && v.path.match(/^venue\/(\d+)$/);
+      if (match) {
+        const venueId = parseInt(match[1]);
+        venueVisitMap[venueId] = (venueVisitMap[venueId] || 0) + 1;
+      }
+    });
+
+    // Join with venue names
+    const { data: venues } = await supabase.from('venues').select('id, name');
+    const venueNameMap = {};
+    (venues || []).forEach(v => { venueNameMap[v.id] = v.name; });
+
+    const venueStats = Object.entries(venueVisitMap)
+      .map(([id, count]) => ({ venue_id: parseInt(id), venue_name: venueNameMap[parseInt(id)] || '未知场馆', count }))
+      .sort((a, b) => b.count - a.count);
+
+    res.json({ total, today: todayViews, venueStats });
   } catch (err) {
     res.status(500).json({ error: '读取失败' });
   }

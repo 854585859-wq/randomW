@@ -333,13 +333,31 @@
     async function renderStats() {
       try {
         const s = await api('/api/admin/stats');
-        return `<div class="card" style="text-align:center;">
+        let html = `<div class="card" style="text-align:center;">
           <h3 style="font-weight:500;margin-bottom:1rem;font-size:0.9rem;">访问统计</h3>
           <div style="display:flex;justify-content:center;gap:2rem;">
             <div><p style="font-size:2.2rem;font-weight:500;">${s.today}</p><p style="color:var(--ink-50);font-size:0.75rem;">今日访问</p></div>
             <div><p style="font-size:2.2rem;font-weight:500;">${s.total}</p><p style="color:var(--ink-50);font-size:0.75rem;">总访问量</p></div>
           </div>
         </div>`;
+
+        // Venue popularity ranking
+        if (s.venueStats && s.venueStats.length > 0) {
+          html += `<div class="card" style="margin-top:1.25rem;">
+            <h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">场馆热度排行</h3>
+            <table>
+              <thead><tr><th>排名</th><th>场馆</th><th>访问次数</th></tr></thead>
+              <tbody>
+                ${s.venueStats.map((v, i) => `<tr>
+                  <td>${i + 1}</td>
+                  <td><strong>${escHtml(v.venue_name)}</strong></td>
+                  <td>${v.count} 次</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`;
+        }
+        return html;
       } catch(e) { return '<div class="empty"><p>加载失败</p></div>'; }
     }
 
