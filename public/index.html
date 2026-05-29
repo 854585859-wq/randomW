@@ -134,9 +134,9 @@
       const body = showModal('提供信息', '', () => {});
       body.innerHTML = `
         <form id="fbForm" onsubmit="submitFeedback(event)">
-          <div class="form-group"><label>姓名</label><input type="text" name="name" class="form-input"></div>
-          <div class="form-group"><label>邮箱</label><input type="email" name="email" class="form-input"></div>
-          <div class="form-group"><label>内容</label><textarea name="message" class="form-input" rows="4" required></textarea></div>
+          <div class="form-group">
+            <textarea name="message" class="form-input" rows="4" required placeholder="艺人/场馆/时间，如果有没有添加的演出，请告知…"></textarea>
+          </div>
           <button type="submit" class="btn btn-primary" style="width:100%">提交</button>
         </form>
       `;
@@ -148,7 +148,7 @@
       try {
         await api('/api/user-feedback', {
           method: 'POST',
-          body: JSON.stringify({ name: f.name.value, email: f.email.value, message: f.message.value, page: 'calendar' }),
+          body: JSON.stringify({ name: '', email: '', message: f.message.value, page: 'calendar' }),
         });
         f.closest('.modal-overlay').remove();
         alert('提交成功！');
