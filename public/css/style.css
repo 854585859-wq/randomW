@@ -30,15 +30,25 @@ a { color: var(--ink); text-decoration: none; }
 .topbar { position: relative; }
 .topbar::before {
   content: '🎫';
-  position: absolute; top: 0.8rem; left: 50%; transform: translateX(-50%) rotate(-8deg);
-  font-size: 1.4rem; opacity: 0.5; pointer-events: none; z-index: 1;
+  position: absolute; top: 1rem; left: 50%; transform: translateX(-50%) rotate(-8deg);
+  font-size: 1.8rem; opacity: 0.65; pointer-events: none; z-index: 1;
+}
+/* Masking tape strip behind title */
+.topbar-inner { position: relative; }
+.topbar-inner::before {
+  content: '';
+  position: absolute; top: 0.6rem; left: 50%; transform: translateX(-50%) rotate(-1.5deg);
+  width: 280px; height: 56px;
+  background: repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.6) 20px, rgba(255,255,255,0.6) 22px);
+  border: 0.5px solid rgba(196,135,92,0.2);
+  z-index: 0; pointer-events: none;
 }
 /* Sticker corner marks */
 .calendar-grid { position: relative; }
 .calendar-grid::before {
   content: '✿';
-  position: absolute; top: -0.5rem; right: -0.3rem;
-  font-size: 1rem; opacity: 0.4; pointer-events: none; z-index: 2;
+  position: absolute; top: -0.6rem; right: -0.3rem;
+  font-size: 1.1rem; opacity: 0.55; pointer-events: none; z-index: 2;
 }
 /* Tape on section titles */
 .section-title {
@@ -48,7 +58,7 @@ a { color: var(--ink); text-decoration: none; }
 .section-title::before {
   content: '';
   position: absolute; top: -0.15rem; left: -0.1rem; right: -0.1rem; bottom: -0.15rem;
-  background: var(--accent); opacity: 0.08;
+  background: var(--accent); opacity: 0.12;
   transform: rotate(-0.5deg); z-index: -1;
 }
 /* Small dot accent */
@@ -56,14 +66,14 @@ a { color: var(--ink); text-decoration: none; }
 .page-footer::after {
   content: '· · ·';
   display: block; margin-top: 0.3rem;
-  font-size: 0.7rem; letter-spacing: 0.3em; color: var(--accent); opacity: 0.4;
+  font-size: 0.75rem; letter-spacing: 0.3em; color: var(--accent); opacity: 0.5;
 }
 /* Modal sticker corner */
 .modal { position: relative; overflow: visible; }
 .modal::after {
   content: '📎';
   position: absolute; top: -0.7rem; right: 1.5rem;
-  font-size: 1rem; opacity: 0.45; pointer-events: none;
+  font-size: 1.1rem; opacity: 0.55; pointer-events: none;
 }
 /* Bottom border tape effect */
 .topbar-links {
@@ -72,9 +82,9 @@ a { color: var(--ink); text-decoration: none; }
 .topbar-links::before {
   content: '';
   position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 120px; height: 2px;
+  width: 160px; height: 2px;
   background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 8px, transparent 8px, transparent 16px);
-  opacity: 0.3;
+  opacity: 0.4;
 }
 
 /* ---- Top Bar ---- */
