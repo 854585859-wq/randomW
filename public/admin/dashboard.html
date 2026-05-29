@@ -30,7 +30,7 @@
     </div>
     <div id="quickAdd" style="margin-bottom:1rem;display:none;">
       <form onsubmit="quickAddConcert(event)" style="display:flex;gap:0.5rem;">
-        <input type="text" id="qaInput" class="form-input" placeholder="艺人 @ 场馆 日期 → 结束日期  (例: SEVENTEEN @ KSPO DOME 2026-07-20 → 2026-07-22)" style="flex:1;">
+        <input type="text" id="qaInput" class="form-input" placeholder="艺人 场馆 日期 → 结束日  (例: SEVENTEEN KSPO 2026-07-20 → 2026-07-22)" style="flex:1;">
         <button type="submit" class="btn btn-primary">快速添加</button>
       </form>
     </div>
@@ -63,45 +63,59 @@
       const input = document.getElementById('qaInput').value.trim();
       if (!input) return;
 
-      // Parse: ARTIST @ VENUE DATE [→ END_DATE]
-      const parts = input.split('@');
-      if (parts.length < 2) return alert('格式：艺人 @ 场馆 日期');
-      const artist = parts[0].trim();
-      const rest = parts[1].trim();
+      let text = input.replace(/@|在|at/gi, ' ').replace(/\s+/g, ' ');
+      let artist = '', venueName = '', dateStr = '', endDateStr = '';
 
-      // Split venue and dates
-      let venueName = '', dateStr = '', endDateStr = '';
-      const dateSplit = rest.split('→').map(s => s.trim());
-      const venueAndDate = dateSplit[0];
-      if (dateSplit.length > 1) endDateStr = dateSplit[1];
+      // Split by → for end date
+      const arrowParts = text.split('→').map(s => s.trim());
+      const mainText = arrowParts[0];
+      if (arrowParts.length > 1) endDateStr = arrowParts[1].replace(/\//g, '-').replace(/\./g, '-');
 
-      // Find venue that matches the end of venueAndDate
+      // Try to extract date from the end (YYYY-MM-DD or YYYY/MM/DD)
+      const dateMatch = mainText.match(/(\d{4}[-\/]\d{1,2}[-\/]\d{1,2})\s*$/);
+      if (dateMatch) {
+        dateStr = dateMatch[1].replace(/\//g, '-').replace(/\./g, '-');
+        text = mainText.slice(0, dateMatch.index).trim();
+      } else {
+        text = mainText;
+      }
+
+      // Try to find venue in remaining text
       for (const v of allVenues) {
-        if (venueAndDate.toLowerCase().includes(v.name.toLowerCase())) {
+        const idx = text.toLowerCase().indexOf(v.name.toLowerCase());
+        if (idx !== -1) {
           venueName = v.name;
-          dateStr = venueAndDate.slice(venueAndDate.toLowerCase().indexOf(v.name.toLowerCase()) + v.name.length).trim();
+          artist = (text.slice(0, idx) + ' ' + text.slice(idx + v.name.length)).trim().replace(/\s+/g, ' ');
           break;
         }
       }
 
-      // Normalize dates
-      dateStr = dateStr.replace(/\//g, '-').replace(/\./g, '-');
-      endDateStr = endDateStr.replace(/\//g, '-').replace(/\./g, '-');
+      // If no venue found, just take last word as venue, rest as artist
+      if (!venueName && text) {
+        const words = text.split(' ');
+        artist = text;
+      }
 
-      // Find venue
+      if (!artist) artist = text;
+
       const venue = allVenues.find(v => v.name === venueName);
-      if (!venue) return alert('场馆未找到："' + venueName + '"');
-      if (!dateStr) return alert('请提供日期');
+      if (!venue) {
+        // Just fill what we have - user can fix manually
+        document.getElementById('cArtist').value = artist || text;
+        document.getElementById('cDate').value = dateStr;
+        document.getElementById('cEndDate').value = endDateStr;
+        document.getElementById('qaInput').value = '';
+        document.getElementById('concertForm')?.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
 
-      // Fill form
       document.getElementById('cDate').value = dateStr;
-      document.getElementById('cEndDate').value = endDateStr || '';
+      document.getElementById('cEndDate').value = endDateStr;
       document.getElementById('cArtist').value = artist;
       document.getElementById('cVenue').value = venue.id;
       document.getElementById('qaInput').value = '';
-
-      // Scroll to form
       document.getElementById('concertForm')?.scrollIntoView({ behavior: 'smooth' });
+    }
     }
 
     // --- Tabs ---
