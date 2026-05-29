@@ -10,6 +10,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",
     "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "express-session": "^1.18.0",

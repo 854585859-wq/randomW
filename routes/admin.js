@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { readData, writeData } from '../utils/data.js';
-import { requireAdmin } from '../middleware/auth.js';
+import { requireAdmin, setAdminCookie, clearAdminCookie } from '../middleware/auth.js';
 import { sendSubscriptionEmail } from '../utils/mail.js';
 import { supabase } from '../lib/supabase.js';
 
@@ -18,6 +18,7 @@ adminRouter.post('/login', async (req, res) => {
     }
     req.session.isAdmin = true;
     req.session.username = username;
+    setAdminCookie(res, username);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: '登录失败' });
@@ -30,6 +31,7 @@ adminRouter.get('/check', (req, res) => {
 
 adminRouter.post('/logout', (req, res) => {
   req.session.destroy();
+  clearAdminCookie(res);
   res.json({ success: true });
 });
 
