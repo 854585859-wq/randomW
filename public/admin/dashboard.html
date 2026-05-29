@@ -272,13 +272,11 @@
       html += '<div class="card">';
       html += '<h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">场馆列表</h3>';
       if (allVenues.length > 0) {
-        html += '<table><thead><tr><th></th><th>名称</th><th></th></tr></thead><tbody>';
-        allVenues.forEach((v, i) => {
+        html += '<table><thead><tr><th>排序</th><th>名称</th><th></th></tr></thead><tbody>';
+        allVenues.forEach((v) => {
           html += `<tr>
-            <td style="width:40px;text-align:center;">
-              ${i > 0 ? `<a href="#" onclick="moveVenue(${v.id},'up',event)" style="color:var(--ink-25);">▲</a>` : ''}
-              ${i < allVenues.length - 1 ? `<a href="#" onclick="moveVenue(${v.id},'down',event)" style="color:var(--ink-25);">▼</a>` : ''}
-            </td>
+            <td><input type="number" class="form-input" value="${v.sort_order || 0}" style="width:60px;padding:0.2rem 0.3rem;text-align:center;"
+              onchange="updateVenueOrder(${v.id}, this.value)"></td>
             <td><strong>${escHtml(v.name)}</strong></td>
             <td><button class="btn btn-sm" onclick="startEditVenue(${v.id})">编辑</button>
                 <button class="btn btn-sm btn-danger" onclick="deleteVenue(${v.id})">删除</button></td></tr>`;
@@ -301,10 +299,10 @@
       editingVenueId = id;
       loadData();
     };
-    window.moveVenue = async function(id, dir, e) {
-      e.preventDefault();
-      try { await api('/api/admin/venues/reorder', { method: 'POST', body: JSON.stringify({ id, direction: dir }) }); loadData(); }
-      catch(err) { alert('排序失败: ' + err.message); }
+    window.updateVenueOrder = async function(id, value) {
+      try {
+        await api('/api/admin/venues', { method: 'POST', body: JSON.stringify({ id, name: '', sort_order: parseInt(value) || 0 }) });
+      } catch(err) {}
     };
 
     window.cancelEditVenue = function() {

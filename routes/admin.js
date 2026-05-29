@@ -86,13 +86,19 @@ adminRouter.delete('/concerts/:id', requireAdmin, async (req, res) => {
 // --- Venues (admin) ---
 adminRouter.post('/venues', requireAdmin, async (req, res) => {
   try {
-    const { id, name } = req.body;
-    if (!name || !name.trim()) return res.status(400).json({ error: '场馆名称不能为空' });
+    const { id, name, sort_order } = req.body;
+
+    const data = {};
+    if (name && name.trim()) data.name = name.trim();
+    if (sort_order !== undefined) data.sort_order = parseInt(sort_order);
+
+    if (Object.keys(data).length === 0) return res.status(400).json({ error: '无有效数据' });
 
     if (id) {
-      await supabase.from('venues').update({ name }).eq('id', id);
+      await supabase.from('venues').update(data).eq('id', id);
     } else {
-      await supabase.from('venues').insert({ name });
+      if (!data.name) return res.status(400).json({ error: '场馆名称不能为空' });
+      await supabase.from('venues').insert({ name: data.name, sort_order: data.sort_order || 0 });
     }
     res.json({ success: true });
   } catch (err) {
