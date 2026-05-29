@@ -26,6 +26,57 @@ body {
 }
 a { color: var(--ink); text-decoration: none; }
 
+/* Decorative tape sticker */
+.topbar { position: relative; }
+.topbar::before {
+  content: '🎫';
+  position: absolute; top: 0.8rem; left: 50%; transform: translateX(-50%) rotate(-8deg);
+  font-size: 1.4rem; opacity: 0.5; pointer-events: none; z-index: 1;
+}
+/* Sticker corner marks */
+.calendar-grid { position: relative; }
+.calendar-grid::before {
+  content: '✿';
+  position: absolute; top: -0.5rem; right: -0.3rem;
+  font-size: 1rem; opacity: 0.4; pointer-events: none; z-index: 2;
+}
+/* Tape on section titles */
+.section-title {
+  position: relative; display: inline-block;
+  padding: 0.2rem 0.8rem; margin-left: -0.3rem;
+}
+.section-title::before {
+  content: '';
+  position: absolute; top: -0.15rem; left: -0.1rem; right: -0.1rem; bottom: -0.15rem;
+  background: var(--accent); opacity: 0.08;
+  transform: rotate(-0.5deg); z-index: -1;
+}
+/* Small dot accent */
+.page-footer { position: relative; }
+.page-footer::after {
+  content: '· · ·';
+  display: block; margin-top: 0.3rem;
+  font-size: 0.7rem; letter-spacing: 0.3em; color: var(--accent); opacity: 0.4;
+}
+/* Modal sticker corner */
+.modal { position: relative; overflow: visible; }
+.modal::after {
+  content: '📎';
+  position: absolute; top: -0.7rem; right: 1.5rem;
+  font-size: 1rem; opacity: 0.45; pointer-events: none;
+}
+/* Bottom border tape effect */
+.topbar-links {
+  position: relative;
+}
+.topbar-links::before {
+  content: '';
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 120px; height: 2px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 8px, transparent 8px, transparent 16px);
+  opacity: 0.3;
+}
+
 /* ---- Top Bar ---- */
 .topbar {
   background-color: var(--paper);
