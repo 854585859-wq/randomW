@@ -1,26 +1,26 @@
 [
   {
-    "id": 3,
-    "name": "KSPO DOME"
-  },
-  {
-    "id": 4,
-    "name": "INSPIRE Arena"
-  },
-  {
-    "id": 5,
-    "name": "高尺天空巨蛋"
-  },
-  {
-    "id": 6,
+    "id": 1,
     "name": "奥林匹克大厅"
   },
   {
-    "id": 7,
+    "id": 2,
+    "name": "高尺天空巨蛋"
+  },
+  {
+    "id": 3,
     "name": "Ticketlink Live Arena"
   },
   {
-    "id": 8,
+    "id": 4,
     "name": "蚕室室内体育馆"
+  },
+  {
+    "id": 5,
+    "name": "KSPO DOME"
+  },
+  {
+    "id": 6,
+    "name": "INSPIRE Arena"
   }
 ]

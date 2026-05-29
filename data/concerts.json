@@ -4,7 +4,7 @@
     "date": "2026-05-15",
     "endDate": "2026-05-17",
     "artist": "LucyBand",
-    "venueId": 3,
+    "venueId": 5,
     "venueName": "KSPO DOME",
     "description": ""
   },
@@ -13,7 +13,7 @@
     "date": "2026-05-22",
     "endDate": "2026-05-24",
     "artist": "首尔爵士音乐节",
-    "venueId": 3,
+    "venueId": 5,
     "venueName": "KSPO DOME",
     "description": ""
   },
@@ -22,7 +22,7 @@
     "date": "2026-05-29",
     "endDate": "2026-05-31",
     "artist": "SHINee",
-    "venueId": 3,
+    "venueId": 5,
     "venueName": "KSPO DOME",
     "description": ""
   },
@@ -31,7 +31,7 @@
     "date": "2026-06-05",
     "endDate": "2026-06-07",
     "artist": "wvs con",
-    "venueId": 3,
+    "venueId": 5,
     "venueName": "KSPO DOME",
     "description": ""
   },
@@ -39,8 +39,8 @@
     "id": 5,
     "date": "2026-06-12",
     "endDate": "2026-06-14",
-    "artist": "XIA金俊秀",
-    "venueId": 3,
+    "artist": "金俊秀",
+    "venueId": 5,
     "venueName": "KSPO DOME",
     "description": ""
   },
@@ -49,7 +49,7 @@
     "date": "2026-06-19",
     "endDate": "2026-06-21",
     "artist": "king gnu",
-    "venueId": 3,
+    "venueId": 5,
     "venueName": "KSPO DOME",
     "description": ""
   },
@@ -58,7 +58,7 @@
     "date": "2026-06-26",
     "endDate": "2026-06-28",
     "artist": "TWS",
-    "venueId": 3,
+    "venueId": 5,
     "venueName": "KSPO DOME",
     "description": ""
   },
@@ -67,7 +67,7 @@
     "date": "2026-07-03",
     "endDate": "2026-07-05",
     "artist": "DAY6",
-    "venueId": 3,
+    "venueId": 5,
     "venueName": "KSPO DOME",
     "description": ""
   },
@@ -76,7 +76,7 @@
     "date": "2026-07-17",
     "endDate": "2026-07-19",
     "artist": "BND",
-    "venueId": 3,
+    "venueId": 5,
     "venueName": "KSPO DOME",
     "description": ""
   },
@@ -85,7 +85,7 @@
     "date": "2026-08-07",
     "endDate": "2026-08-09",
     "artist": "HIGE",
-    "venueId": 3,
+    "venueId": 5,
     "venueName": "KSPO DOME",
     "description": ""
   },
@@ -94,7 +94,7 @@
     "date": "2026-08-14",
     "endDate": "2026-08-16",
     "artist": "T1主场",
-    "venueId": 3,
+    "venueId": 5,
     "venueName": "KSPO DOME",
     "description": ""
   },
@@ -103,7 +103,7 @@
     "date": "2026-09-11",
     "endDate": "2026-09-13",
     "artist": "LCK",
-    "venueId": 3,
+    "venueId": 5,
     "venueName": "KSPO DOME",
     "description": ""
   },
@@ -112,7 +112,7 @@
     "date": "2026-10-23",
     "endDate": "2026-10-25",
     "artist": "jannabi",
-    "venueId": 3,
+    "venueId": 5,
     "venueName": "KSPO DOME",
     "description": ""
   },
@@ -121,7 +121,7 @@
     "date": "2026-05-22",
     "endDate": "2026-05-24",
     "artist": "trot night",
-    "venueId": 4,
+    "venueId": 6,
     "venueName": "INSPIRE Arena",
     "description": ""
   },
@@ -130,7 +130,7 @@
     "date": "2026-05-29",
     "endDate": "2026-05-31",
     "artist": "mega演唱会",
-    "venueId": 4,
+    "venueId": 6,
     "venueName": "INSPIRE Arena",
     "description": ""
   },
@@ -139,7 +139,7 @@
     "date": "2026-06-12",
     "endDate": "2026-06-14",
     "artist": "ALD1",
-    "venueId": 4,
+    "venueId": 6,
     "venueName": "INSPIRE Arena",
     "description": ""
   },
@@ -148,7 +148,7 @@
     "date": "2026-06-19",
     "endDate": "2026-06-21",
     "artist": "首尔歌谣大赏",
-    "venueId": 4,
+    "venueId": 6,
     "venueName": "INSPIRE Arena",
     "description": ""
   },
@@ -157,7 +157,7 @@
     "date": "2026-06-26",
     "endDate": "2026-06-28",
     "artist": "xdinaryheroes",
-    "venueId": 4,
+    "venueId": 6,
     "venueName": "INSPIRE Arena",
     "description": ""
   },
@@ -166,7 +166,7 @@
     "date": "2026-07-03",
     "endDate": "2026-07-05",
     "artist": "&TEAM",
-    "venueId": 4,
+    "venueId": 6,
     "venueName": "INSPIRE Arena",
     "description": ""
   },
@@ -175,7 +175,7 @@
     "date": "2026-07-10",
     "endDate": "2026-07-12",
     "artist": "LESSERAFIM",
-    "venueId": 4,
+    "venueId": 6,
     "venueName": "INSPIRE Arena",
     "description": ""
   },
@@ -184,7 +184,7 @@
     "date": "2026-08-07",
     "endDate": "2026-08-09",
     "artist": "2PM",
-    "venueId": 4,
+    "venueId": 6,
     "venueName": "INSPIRE Arena",
     "description": ""
   },
@@ -193,7 +193,7 @@
     "date": "2025-11-20",
     "endDate": "2025-11-23",
     "artist": "PLAVE",
-    "venueId": 5,
+    "venueId": 2,
     "venueName": "高尺天空巨蛋",
     "description": ""
   },
@@ -202,7 +202,7 @@
     "date": "2025-12-11",
     "endDate": "2025-12-14",
     "artist": "G-DRAGON",
-    "venueId": 5,
+    "venueId": 2,
     "venueName": "高尺天空巨蛋",
     "description": ""
   },
@@ -211,16 +211,25 @@
     "date": "2025-12-18",
     "endDate": "2025-12-21",
     "artist": "MMA",
-    "venueId": 5,
+    "venueId": 2,
     "venueName": "高尺天空巨蛋",
     "description": ""
   },
   {
     "id": 25,
     "date": "2025-12-25",
-    "endDate": "2025-12-26",
+    "endDate": null,
     "artist": "BrownEyedSoul",
-    "venueId": 5,
+    "venueId": 2,
+    "venueName": "高尺天空巨蛋",
+    "description": ""
+  },
+  {
+    "id": 26,
+    "date": "2025-12-26",
+    "endDate": null,
+    "artist": "BrownEyedSoul",
+    "venueId": 2,
     "venueName": "高尺天空巨蛋",
     "description": ""
   },
@@ -229,7 +238,7 @@
     "date": "2025-11-07",
     "endDate": "2025-11-09",
     "artist": "ILLIT",
-    "venueId": 6,
+    "venueId": 1,
     "venueName": "奥林匹克大厅",
     "description": ""
   },
@@ -238,7 +247,7 @@
     "date": "2025-11-14",
     "endDate": "2025-11-16",
     "artist": "YdBB",
-    "venueId": 6,
+    "venueId": 1,
     "venueName": "奥林匹克大厅",
     "description": ""
   },
@@ -247,7 +256,7 @@
     "date": "2025-11-21",
     "endDate": "2025-11-23",
     "artist": "李承哲",
-    "venueId": 6,
+    "venueId": 1,
     "venueName": "奥林匹克大厅",
     "description": ""
   },
@@ -256,7 +265,7 @@
     "date": "2025-12-19",
     "endDate": "2025-12-21",
     "artist": "圭贤",
-    "venueId": 6,
+    "venueId": 1,
     "venueName": "奥林匹克大厅",
     "description": ""
   },
@@ -265,8 +274,107 @@
     "date": "2026-01-02",
     "endDate": "2026-01-04",
     "artist": "ash island",
-    "venueId": 6,
+    "venueId": 1,
     "venueName": "奥林匹克大厅",
+    "description": ""
+  },
+  {
+    "id": 32,
+    "date": "2025-11-28",
+    "endDate": "2025-11-30",
+    "artist": "金廷祐",
+    "venueId": 3,
+    "venueName": "Ticketlink Live Arena",
+    "description": ""
+  },
+  {
+    "id": 33,
+    "date": "2025-12-05",
+    "endDate": "2025-12-07",
+    "artist": "郑承焕",
+    "venueId": 3,
+    "venueName": "Ticketlink Live Arena",
+    "description": ""
+  },
+  {
+    "id": 34,
+    "date": "2025-12-12",
+    "endDate": "2025-12-14",
+    "artist": "ROY KIM",
+    "venueId": 3,
+    "venueName": "Ticketlink Live Arena",
+    "description": ""
+  },
+  {
+    "id": 35,
+    "date": "2025-12-19",
+    "endDate": "2025-12-21",
+    "artist": "N.Flying",
+    "venueId": 3,
+    "venueName": "Ticketlink Live Arena",
+    "description": ""
+  },
+  {
+    "id": 36,
+    "date": "2025-12-25",
+    "endDate": "2025-12-28",
+    "artist": "Epik High",
+    "venueId": 3,
+    "venueName": "Ticketlink Live Arena",
+    "description": ""
+  },
+  {
+    "id": 37,
+    "date": "2026-01-02",
+    "endDate": "2026-01-04",
+    "artist": "姜大声",
+    "venueId": 3,
+    "venueName": "Ticketlink Live Arena",
+    "description": ""
+  },
+  {
+    "id": 38,
+    "date": "2025-11-21",
+    "endDate": "2025-11-23",
+    "artist": "XDINARY HEROES",
+    "venueId": 4,
+    "venueName": "蚕室室内体育馆",
+    "description": ""
+  },
+  {
+    "id": 39,
+    "date": "2025-11-28",
+    "endDate": "2025-11-30",
+    "artist": "WOODZ",
+    "venueId": 4,
+    "venueName": "蚕室室内体育馆",
+    "description": ""
+  },
+  {
+    "id": 40,
+    "date": "2025-12-19",
+    "endDate": "2025-12-21",
+    "artist": "CRUSH",
+    "venueId": 4,
+    "venueName": "蚕室室内体育馆",
+    "description": ""
+  },
+  {
+    "id": 41,
+    "date": "2026-01-30",
+    "endDate": "2026-02-01",
+    "artist": "LE SSERAFIM",
+    "venueId": 4,
+    "venueName": "蚕室室内体育馆",
+    "description": ""
+  },
+  {
+    "id": 42,
+    "date": "2026-02-13",
+    "endDate": "2026-02-15",
+    "artist": "ITZY",
+    "venueId": 4,
+    "venueName": "蚕室室内体育馆",
     "description": ""
   }
 ]
