@@ -73,19 +73,19 @@
         // Group by venueId, sort by date within each group
         const grouped = {};
         allConcerts.forEach(c => {
-          const vId = c.venueId;
+          const vId = c.venue_id;
           if (!grouped[vId]) grouped[vId] = [];
           grouped[vId].push(c);
         });
         Object.values(grouped).forEach(arr => arr.sort((a, b) => a.date.localeCompare(b.date)));
 
         for (const [vId, concerts] of Object.entries(grouped)) {
-          const vName = concerts[0].venueName;
+          const vName = concerts[0].venue_name;
           html += `<h3 style="font-family:var(--serif);font-weight:400;font-size:0.9rem;margin:1rem 0 0.4rem;color:var(--ink-50);">${escHtml(vName)} · ${concerts.length} 场</h3>`;
           html += '<div class="table-wrap"><table><thead><tr><th>日期</th><th>艺人</th><th>描述</th><th></th></tr></thead><tbody>';
           concerts.forEach(c => {
             html += `<tr>
-              <td>${c.endDate ? escHtml(c.date) + ' → ' + escHtml(c.endDate) : escHtml(c.date)}</td>
+              <td>${c.end_date ? escHtml(c.date) + ' → ' + escHtml(c.end_date) : escHtml(c.date)}</td>
               <td><strong>${escHtml(c.artist)}</strong></td>
               <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(c.description || '-')}</td>
               <td style="white-space:nowrap;">
@@ -102,11 +102,11 @@
         <form id="concertForm" onsubmit="saveConcert(event)">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
             <div class="form-group"><label>开始日期</label><input type="date" id="cDate" class="form-input" required value="${editing?.date || ''}"></div>
-            <div class="form-group"><label>结束日期（可空）</label><input type="date" id="cEndDate" class="form-input" value="${editing?.endDate || ''}"></div>
+            <div class="form-group"><label>结束日期（可空）</label><input type="date" id="cEndDate" class="form-input" value="${editing?.end_date || ''}"></div>
             <div class="form-group"><label>艺人</label><input type="text" id="cArtist" class="form-input" required value="${escHtml(editing?.artist || '')}"></div>
             <div class="form-group"><label>场馆</label><select id="cVenue" class="form-input" required>
               <option value="">— 选择 —</option>
-              ${allVenues.map(v => `<option value="${v.id}" ${editing?.venueId === v.id ? 'selected' : ''}>${escHtml(v.name)}</option>`).join('')}
+              ${allVenues.map(v => `<option value="${v.id}" ${editing?.venue_id === v.id ? 'selected' : ''}>${escHtml(v.name)}</option>`).join('')}
             </select></div>
             <div class="form-group"><label>描述</label><input type="text" id="cDesc" class="form-input" value="${escHtml(editing?.description || '')}"></div>
           </div>

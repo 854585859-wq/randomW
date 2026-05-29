@@ -93,7 +93,7 @@
 
     function concertOnDate(c, dateKey) {
       if (c.date === dateKey) return true;
-      if (c.endDate && c.date <= dateKey && dateKey <= c.endDate) return true;
+      if (c.end_date && c.date <= dateKey && dateKey <= c.end_date) return true;
       return false;
     }
 
@@ -106,7 +106,7 @@
       }
 
       const venueColor = getVenueColor(venue.id);
-      const venueConcerts = allConcerts.filter(c => c.venueId === venue.id);
+      const venueConcerts = allConcerts.filter(c => c.venue_id === venue.id);
 
       let html = `<div class="calendar-header">
         <h2>${escHtml(venue.name)} · ${currentYear}.${String(currentMonth+1).padStart(2,'0')}</h2>
@@ -163,12 +163,12 @@
     function showDetail(id) {
       const c = allConcerts.find(x => x.id === id);
       if (!c) return;
-      const dateRange = c.endDate ? `${c.date} → ${c.endDate}` : c.date;
+      const dateRange = c.end_date ? `${c.date} → ${c.end_date}` : c.date;
       const body = showModal(c.artist, '');
       body.innerHTML = `
         <div style="line-height:2;font-weight:300;">
           <p><span style="color:var(--ink-30);font-size:0.75rem;">日期</span><br>${escHtml(dateRange)}</p>
-          <p style="margin-top:0.4rem;"><span style="color:var(--ink-30);font-size:0.75rem;">场馆</span><br>${escHtml(c.venueName)}</p>
+          <p style="margin-top:0.4rem;"><span style="color:var(--ink-30);font-size:0.75rem;">场馆</span><br>${escHtml(c.venue_name)}</p>
           <p style="margin-top:0.6rem;font-size:0.85rem;">${escHtml(c.description || '暂无详情')}</p>
         </div>
       `;

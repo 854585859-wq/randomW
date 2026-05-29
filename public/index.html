@@ -92,7 +92,7 @@
 
     function concertOnDate(c, dateKey) {
       if (c.date === dateKey) return true;
-      if (c.endDate && c.date <= dateKey && dateKey <= c.endDate) return true;
+      if (c.end_date && c.date <= dateKey && dateKey <= c.end_date) return true;
       return false;
     }
 
@@ -110,7 +110,7 @@
 
     function renderEvents(dateKey) {
       return allConcerts.filter(c => concertOnDate(c, dateKey)).map(c => {
-        const vc = getVenueColor(c.venueName);
+        const vc = getVenueColor(c.venue_name);
         return `<div class="calendar-event" style="border-left:2px solid ${vc};background:${vc}15;"
           onclick="event.stopPropagation();showDetail(${c.id})">${escHtml(c.artist)}</div>`;
       }).join('');
@@ -120,11 +120,11 @@
       const c = allConcerts.find(x => x.id === id);
       if (!c) return;
       const body = showModal(c.artist, '');
-      const dateRange = c.endDate ? `${c.date} → ${c.endDate}` : c.date;
+      const dateRange = c.end_date ? `${c.date} → ${c.end_date}` : c.date;
       body.innerHTML = `
         <div style="line-height:2;font-weight:300;">
           <p><span style="color:var(--ink-30);font-size:0.75rem;">日期</span><br>${escHtml(dateRange)}</p>
-          <p style="margin-top:0.4rem;"><span style="color:var(--ink-30);font-size:0.75rem;">场馆</span><br>${escHtml(c.venueName)}</p>
+          <p style="margin-top:0.4rem;"><span style="color:var(--ink-30);font-size:0.75rem;">场馆</span><br>${escHtml(c.venue_name)}</p>
           <p style="margin-top:0.6rem;font-size:0.85rem;">${escHtml(c.description || '暂无详情')}</p>
         </div>
       `;

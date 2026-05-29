@@ -8,8 +8,8 @@ export const apiRouter = Router();
 // GET /api/concerts
 apiRouter.get('/concerts', async (_req, res) => {
   try {
-    const concerts = await readData('concerts');
-    res.json(concerts);
+    const { data } = await supabase.from('concerts').select('*').order('date');
+    res.json(data || []);
   } catch (err) {
     res.status(500).json({ error: '读取演唱会数据失败' });
   }
@@ -18,8 +18,8 @@ apiRouter.get('/concerts', async (_req, res) => {
 // GET /api/venues
 apiRouter.get('/venues', async (_req, res) => {
   try {
-    const venues = await readData('venues');
-    res.json(venues);
+    const { data } = await supabase.from('venues').select('*').order('name');
+    res.json(data || []);
   } catch (err) {
     res.status(500).json({ error: '读取场馆数据失败' });
   }
@@ -37,14 +37,12 @@ apiRouter.get('/venue-bookings', async (req, res) => {
   }
 });
 
-// POST /api/track (page view counter)
+// POST /api/track
 apiRouter.post('/track', async (req, res) => {
   try {
     await supabase.from('page_views').insert({ path: req.body.path || '/' });
-    res.json({ success: true });
-  } catch (err) {
-    res.json({ success: true }); // silently ignore
-  }
+  } catch (err) {}
+  res.json({ success: true });
 });
 
 // POST /api/subscribe
@@ -56,11 +54,9 @@ apiRouter.post('/subscribe', async (req, res) => {
     }
     const { data: existing } = await supabase.from('subscriptions').select('*').eq('email', email).eq('artist', artist);
     if (existing && existing.length > 0) return res.json({ success: true, message: '已订阅' });
-
     await supabase.from('subscriptions').insert({ email, artist });
     res.json({ success: true, message: '订阅成功' });
   } catch (err) {
-    console.error('Subscribe error:', err);
     res.status(500).json({ error: '订阅失败' });
   }
 });
