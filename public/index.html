@@ -190,6 +190,8 @@
       } catch(err) { alert('订阅失败: ' + err.message); }
     };
 
+    // Track page view
+    fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: 'calendar' }) }).catch(() => {});
     (async () => { await loadConcerts(); renderCalendar(); })();
   </script>
 </body>

@@ -25,6 +25,7 @@
     <div class="tabs" style="margin-top:1rem;">
       <div class="tab active" data-tab="concerts">演唱会</div>
       <div class="tab" data-tab="venues">场馆</div>
+      <div class="tab" data-tab="stats">统计</div>
       <div class="tab" data-tab="subscriptions">订阅</div>
     </div>
     <div id="tabContent"></div>
@@ -207,6 +208,22 @@
     }
 
     // ============================================================
+    //  STATS
+    // ============================================================
+    async function renderStats() {
+      try {
+        const s = await api('/api/admin/stats');
+        return `<div class="card" style="text-align:center;">
+          <h3 style="font-weight:500;margin-bottom:1rem;font-size:0.9rem;">访问统计</h3>
+          <div style="display:flex;justify-content:center;gap:2rem;">
+            <div><p style="font-size:2.2rem;font-weight:500;">${s.today}</p><p style="color:var(--ink-50);font-size:0.75rem;">今日访问</p></div>
+            <div><p style="font-size:2.2rem;font-weight:500;">${s.total}</p><p style="color:var(--ink-50);font-size:0.75rem;">总访问量</p></div>
+          </div>
+        </div>`;
+      } catch(e) { return '<div class="empty"><p>加载失败</p></div>'; }
+    }
+
+    // ============================================================
     //  SUBSCRIPTIONS
     // ============================================================
     async function renderSubscriptions() {
@@ -244,6 +261,7 @@
       const content = document.getElementById('tabContent');
       if (tab === 'concerts') content.innerHTML = renderConcerts();
       else if (tab === 'venues') content.innerHTML = renderVenues();
+      else if (tab === 'stats') content.innerHTML = await renderStats();
       else if (tab === 'subscriptions') content.innerHTML = await renderSubscriptions();
     }
 

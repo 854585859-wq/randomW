@@ -144,6 +144,19 @@ adminRouter.delete('/venues/:id', requireAdmin, async (req, res) => {
   }
 });
 
+// --- Stats (admin) ---
+adminRouter.get('/stats', requireAdmin, async (_req, res) => {
+  try {
+    const { data: all } = await supabase.from('page_views').select('created_at');
+    const total = all ? all.length : 0;
+    const today = new Date().toISOString().split('T')[0];
+    const todayViews = all ? all.filter(v => v.created_at.startsWith(today)).length : 0;
+    res.json({ total, today: todayViews });
+  } catch (err) {
+    res.status(500).json({ error: '读取失败' });
+  }
+});
+
 // --- Subscriptions (admin) ---
 adminRouter.get('/subscriptions', requireAdmin, async (_req, res) => {
   try {

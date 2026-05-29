@@ -37,6 +37,16 @@ apiRouter.get('/venue-bookings', async (req, res) => {
   }
 });
 
+// POST /api/track (page view counter)
+apiRouter.post('/track', async (req, res) => {
+  try {
+    await supabase.from('page_views').insert({ path: req.body.path || '/' });
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: true }); // silently ignore
+  }
+});
+
 // POST /api/subscribe
 apiRouter.post('/subscribe', async (req, res) => {
   try {
