@@ -18,7 +18,7 @@ apiRouter.get('/concerts', async (_req, res) => {
 // GET /api/venues
 apiRouter.get('/venues', async (_req, res) => {
   try {
-    const { data } = await supabase.from('venues').select('*').order('name');
+    const { data } = await supabase.from('venues').select('*').order('sort_order', { ascending: true }).order('name');
     res.json(data || []);
   } catch (err) {
     res.status(500).json({ error: '读取场馆数据失败' });

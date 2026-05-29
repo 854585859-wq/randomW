@@ -113,6 +113,28 @@ adminRouter.delete('/venues/:id', requireAdmin, async (req, res) => {
   }
 });
 
+// Venue reorder
+adminRouter.post('/venues/reorder', requireAdmin, async (req, res) => {
+  try {
+    const { id, direction } = req.body;
+    const { data: venues } = await supabase.from('venues').select('*').order('sort_order').order('name');
+
+    const idx = venues.findIndex(v => v.id === id);
+    if (idx === -1) return res.status(404).json({ error: '未找到' });
+
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= venues.length) return res.json({ success: true });
+
+    const a = venues[idx], b = venues[swapIdx];
+    await supabase.from('venues').update({ sort_order: b.sort_order }).eq('id', a.id);
+    await supabase.from('venues').update({ sort_order: a.sort_order }).eq('id', b.id);
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: '排序失败' });
+  }
+});
+
 // --- Stats (admin) ---
 adminRouter.get('/stats', requireAdmin, async (_req, res) => {
   try {
