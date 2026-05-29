@@ -97,6 +97,7 @@ a { color: var(--ink); text-decoration: none; }
 }
 .topbar-inner {
   max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 0;
+  position: relative;
 }
 .topbar-logo {
   font-family: var(--serif-display); font-size: 4rem; font-weight: 300;
