@@ -341,10 +341,10 @@
           </div>
         </div>`;
 
-        // Venue popularity ranking
+        // Venue visit ranking
         if (s.venueStats && s.venueStats.length > 0) {
           html += `<div class="card" style="margin-top:1.25rem;">
-            <h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">场馆热度排行</h3>
+            <h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">场馆访问排行</h3>
             <table>
               <thead><tr><th>排名</th><th>场馆</th><th>访问次数</th></tr></thead>
               <tbody>
@@ -352,6 +352,23 @@
                   <td>${i + 1}</td>
                   <td><strong>${escHtml(v.venue_name)}</strong></td>
                   <td>${v.count} 次</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`;
+        }
+
+        // Concert count per venue
+        if (s.concertStats && s.concertStats.length > 0) {
+          html += `<div class="card" style="margin-top:1.25rem;">
+            <h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">各场馆演出数量</h3>
+            <table>
+              <thead><tr><th>排名</th><th>场馆</th><th>演出场次</th></tr></thead>
+              <tbody>
+                ${s.concertStats.map((v, i) => `<tr>
+                  <td>${i + 1}</td>
+                  <td><strong>${escHtml(v.venue_name)}</strong></td>
+                  <td>${v.count} 场</td>
                 </tr>`).join('')}
               </tbody>
             </table>

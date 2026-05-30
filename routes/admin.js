@@ -168,7 +168,16 @@ adminRouter.get('/stats', requireAdmin, async (_req, res) => {
       .map(([id, count]) => ({ venue_id: parseInt(id), venue_name: venueNameMap[parseInt(id)] || '未知场馆', count }))
       .sort((a, b) => b.count - a.count);
 
-    res.json({ total, today: todayViews, venueStats });
+        // Concert count per venue
+    const { data: concerts } = await supabase.from('concerts').select('venue_id, venue_name');
+    const concertCountMap = {};
+    (concerts || []).forEach(c => {
+      concertCountMap[c.venue_id] = concertCountMap[c.venue_id] || { venue_id: c.venue_id, venue_name: c.venue_name, count: 0 };
+      concertCountMap[c.venue_id].count++;
+    });
+    const concertStats = Object.values(concertCountMap).sort((a, b) => b.count - a.count);
+
+    res.json({ total, today: todayViews, venueStats, concertStats });
   } catch (err) {
     res.status(500).json({ error: '读取失败' });
   }
