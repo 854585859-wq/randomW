@@ -91,8 +91,8 @@
       currentMonth = now.getMonth();
       renderVenueButtons();
       renderVenueCalendar();
-      // Track venue-specific visit
-      fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: 'venue/' + venueId }) }).catch(() => {});
+      // Track venue-specific visit (skip if user opted out)
+      if (!localStorage.getItem('notrack')) fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: 'venue/' + venueId }) }).catch(() => {});
     }
 
     function concertOnDate(c, dateKey) {
@@ -231,7 +231,7 @@
       } catch(err) { alert('订阅失败: ' + err.message); }
     };
 
-    fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: 'venues' }) }).catch(() => {});
+    if (!localStorage.getItem('notrack')) fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: 'venues' }) }).catch(() => {});
     (async () => { await loadData(); renderVenueButtons(); })();
   </script>
 </body>

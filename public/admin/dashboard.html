@@ -39,6 +39,12 @@
 
   <script src="/js/utils.js"></script>
   <script>
+    function toggleNotrack() {
+      if (localStorage.getItem('notrack')) { localStorage.removeItem('notrack'); alert('已恢复追踪'); }
+      else { localStorage.setItem('notrack','1'); alert('已排除自己的访问'); }
+      loadData();
+    }
+
     // --- Auth ---
     async function checkAuth() {
       try { const d = await api('/api/admin/check'); if (!d.loggedIn) location.href = '/admin'; }
@@ -333,8 +339,12 @@
     async function renderStats() {
       try {
         const s = await api('/api/admin/stats');
+        const excluded = localStorage.getItem('notrack');
         let html = `<div class="card" style="text-align:center;">
-          <h3 style="font-weight:500;margin-bottom:1rem;font-size:0.9rem;">访问统计</h3>
+          <h3 style="font-weight:500;margin-bottom:0.5rem;font-size:0.9rem;">访问统计</h3>
+          <p style="font-size:0.7rem;margin-bottom:0.8rem;">
+            <button class="btn btn-sm" style="font-size:0.65rem;" onclick="toggleNotrack()">${excluded ? '✅ 已排除自己 · 点此恢复' : '📊 正在记录所有访问 · 点此排除自己'}</button>
+          </p>
           <div style="display:flex;justify-content:center;gap:2rem;">
             <div><p style="font-size:2.2rem;font-weight:500;">${s.today}</p><p style="color:var(--ink-50);font-size:0.75rem;">今日访问</p></div>
             <div><p style="font-size:2.2rem;font-weight:500;">${s.total}</p><p style="color:var(--ink-50);font-size:0.75rem;">总访问量</p></div>
