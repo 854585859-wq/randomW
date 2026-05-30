@@ -344,6 +344,7 @@
           <h3 style="font-weight:500;margin-bottom:0.5rem;font-size:0.9rem;">访问统计</h3>
           <p style="font-size:0.7rem;margin-bottom:0.8rem;">
             <button class="btn btn-sm" style="font-size:0.65rem;" onclick="toggleNotrack()">${excluded ? '✅ 已排除自己 · 点此恢复' : '📊 正在记录所有访问 · 点此排除自己'}</button>
+            <span style="font-size:0.6rem;color:var(--ink-50);display:block;margin-top:.3rem;">手机端访问 ${location.origin}/notrack 可排除手机</span>
           </p>
           <div style="display:flex;justify-content:center;gap:2rem;">
             <div><p style="font-size:2.2rem;font-weight:500;">${s.today}</p><p style="color:var(--ink-50);font-size:0.75rem;">今日访问</p></div>

@@ -31,6 +31,12 @@ initDataFiles();
 app.use('/api', apiRouter);
 app.use('/api/admin', adminRouter);
 
+// Exclude this device from tracking
+app.get('/notrack', (_req, res) => {
+  res.cookie('notrack', '1', { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
+  res.redirect('/');
+});
+
 // Serve public HTML pages
 app.get('/', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/venues', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'venues.html')));
