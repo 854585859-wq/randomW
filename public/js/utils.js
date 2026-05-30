@@ -45,3 +45,16 @@ function formatDate(d) {
   const parts = d.split('-');
   return `${parts[1]}月${parts[2]}日`;
 }
+
+// Share page
+async function sharePage() {
+  const title = 'Concert Info · Korea Concert Calendar';
+  const url = location.href;
+  const text = '韩国演唱会日程日历，查档期超方便 👀';
+  if (navigator.share) {
+    try { await navigator.share({ title, url, text }); } catch {}
+  } else {
+    try { await navigator.clipboard.writeText(url); alert('链接已复制，可以分享啦 ✨'); }
+    catch { prompt('复制这个链接分享：', url); }
+  }
+}
