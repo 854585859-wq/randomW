@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { readData, writeData } from '../utils/data.js';
-import { requireAdmin, setAdminCookie, clearAdminCookie } from '../middleware/auth.js';
+import { requireAdmin, setAdminCookie, clearAdminCookie, verify, COOKIE_NAME } from '../middleware/auth.js';
 import { sendSubscriptionEmail } from '../utils/mail.js';
 import { supabase } from '../lib/supabase.js';
 
@@ -26,7 +26,11 @@ adminRouter.post('/login', async (req, res) => {
 });
 
 adminRouter.get('/check', (req, res) => {
-  res.json({ loggedIn: !!req.session.isAdmin });
+  // Check admin_token cookie first (stateless, survives server restart),
+  // then fall back to session
+  const token = req.cookies?.[COOKIE_NAME];
+  const loggedIn = (token && verify(token)) || !!req.session?.isAdmin;
+  res.json({ loggedIn });
 });
 
 adminRouter.post('/logout', (req, res) => {
