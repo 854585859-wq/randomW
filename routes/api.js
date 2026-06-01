@@ -40,16 +40,37 @@ apiRouter.get('/venue-bookings', async (req, res) => {
 
 // POST /api/track
 apiRouter.post('/track', async (req, res) => {
+  res.json({ success: true }); // Respond immediately, work in background
   try {
-    if (req.cookies?.notrack) { res.json({ success: true }); return; }
+    if (req.cookies?.notrack) return;
     const token = req.cookies?.[COOKIE_NAME];
-    if (!token || !verify(token)) {
-      const ip = req.ip || req.headers['x-forwarded-for']?.split(',')[0]?.trim() || '';
-      const ua = (req.headers['user-agent'] || '').slice(0, 200);
-      await supabase.from('page_views').insert({ path: req.body.path || '/', ip, user_agent: ua });
-    }
+    if (token && verify(token)) return;
+
+    const ip = req.ip || req.headers['x-forwarded-for']?.split(',')[0]?.trim() || '';
+    const ua = (req.headers['user-agent'] || '').slice(0, 200);
+
+    // Insert with IP first
+    const { data: inserted } = await supabase.from('page_views')
+      .insert({ path: req.body.path || '/', ip, user_agent: ua })
+      .select('id');
+
+    if (!inserted?.length) return;
+    const id = inserted[0].id;
+
+    // Resolve IP → city in background
+    const isPublic = ip && !ip.startsWith('127.') && !ip.startsWith('192.168.') && !ip.startsWith('10.') && !ip.startsWith('172.') && ip !== '::1';
+    if (!isPublic) return;
+
+    try {
+      const geoRes = await fetch(`http://ip-api.com/json/${encodeURIComponent(ip)}?lang=zh-CN&fields=city,regionName,country,isp`);
+      const geo = await geoRes.json();
+      if (geo?.city) {
+        await supabase.from('page_views').update({
+          city: geo.city, region: geo.regionName || '', country: geo.country || '', isp: geo.isp || '',
+        }).eq('id', id);
+      }
+    } catch {}
   } catch (err) {}
-  res.json({ success: true });
 });
 
 // POST /api/subscribe
