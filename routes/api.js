@@ -44,7 +44,9 @@ apiRouter.post('/track', async (req, res) => {
     if (req.cookies?.notrack) { res.json({ success: true }); return; }
     const token = req.cookies?.[COOKIE_NAME];
     if (!token || !verify(token)) {
-      await supabase.from('page_views').insert({ path: req.body.path || '/' });
+      const ip = req.ip || req.headers['x-forwarded-for']?.split(',')[0]?.trim() || '';
+      const ua = (req.headers['user-agent'] || '').slice(0, 200);
+      await supabase.from('page_views').insert({ path: req.body.path || '/', ip, user_agent: ua });
     }
   } catch (err) {}
   res.json({ success: true });
