@@ -444,7 +444,7 @@
           html += `<table><thead><tr><th>邮箱</th><th>艺人</th><th>订阅时间</th><th></th></tr></thead><tbody>
             ${subs.map(s => `<tr>
               <td>${escHtml(s.email)}</td><td><strong>${escHtml(s.artist)}</strong></td>
-              <td>${new Date(s.createdAt).toLocaleDateString('zh-CN')}</td>
+              <td>${new Date(s.created_at).toLocaleDateString('zh-CN')}</td>
               <td><button class="btn btn-sm btn-danger" onclick="deleteSub(${s.id})">删除</button></td></tr>`).join('')}
           </tbody></table>`;
         }

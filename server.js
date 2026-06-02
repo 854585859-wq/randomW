@@ -7,7 +7,6 @@ import { fileURLToPath } from 'url';
 import { initDataFiles } from './utils/data.js';
 import { apiRouter } from './routes/api.js';
 import { adminRouter } from './routes/admin.js';
-import { cronRouter } from './routes/cron.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -32,7 +31,6 @@ initDataFiles();
 // Mount routes
 app.use('/api', apiRouter);
 app.use('/api/admin', adminRouter);
-app.use('/api/cron', cronRouter);
 
 // Exclude this device from tracking
 app.get('/notrack', (_req, res) => {
