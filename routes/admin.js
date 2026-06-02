@@ -187,6 +187,58 @@ adminRouter.get('/stats', requireAdmin, async (_req, res) => {
   }
 });
 
+// --- IP Analytics (admin) ---
+adminRouter.get('/ip-stats', requireAdmin, async (_req, res) => {
+  try {
+    const { data: all } = await supabase.from('page_views').select('ip, city, region, country, isp, created_at').order('id', { ascending: false }).limit(500);
+
+    // City distribution
+    const cityMap = {};
+    // ISP distribution
+    const ispMap = {};
+    // Top IPs
+    const ipMap = {};
+
+    (all || []).forEach(v => {
+      // City
+      const cityKey = [v.city, v.region, v.country].filter(Boolean).join(', ') || '未知';
+      cityMap[cityKey] = (cityMap[cityKey] || 0) + 1;
+
+      // ISP
+      if (v.isp) {
+        ispMap[v.isp] = (ispMap[v.isp] || 0) + 1;
+      }
+
+      // IP
+      if (v.ip) {
+        if (!ipMap[v.ip]) {
+          ipMap[v.ip] = { ip: v.ip, city: v.city || '', region: v.region || '', country: v.country || '', isp: v.isp || '', count: 0 };
+        }
+        ipMap[v.ip].count++;
+      }
+    });
+
+    const cities = Object.entries(cityMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const isps = Object.entries(ispMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const topIPs = Object.values(ipMap)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 20);
+
+    const withIP = (all || []).filter(v => v.ip).length;
+    const total = (all || []).length;
+
+    res.json({ cities, isps, topIPs, withIP, total });
+  } catch (err) {
+    res.status(500).json({ error: '读取失败' });
+  }
+});
+
 // --- Subscriptions (admin) ---
 adminRouter.get('/subscriptions', requireAdmin, async (_req, res) => {
   try {
