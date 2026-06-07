@@ -251,6 +251,25 @@ adminRouter.get('/ip-stats', requireAdmin, async (_req, res) => {
   }
 });
 
+// --- Feedback (admin) ---
+adminRouter.get('/feedback', requireAdmin, async (_req, res) => {
+  try {
+    const { data } = await supabase.from('feedback').select('*').order('id', { ascending: false });
+    res.json(data || []);
+  } catch (err) {
+    res.status(500).json({ error: '读取失败' });
+  }
+});
+
+adminRouter.delete('/feedback/:id', requireAdmin, async (req, res) => {
+  try {
+    await supabase.from('feedback').delete().eq('id', req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: '删除失败' });
+  }
+});
+
 // --- Subscriptions (admin) ---
 adminRouter.get('/subscriptions', requireAdmin, async (_req, res) => {
   try {

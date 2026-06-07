@@ -96,6 +96,14 @@ apiRouter.post('/user-feedback', async (req, res) => {
     if (!message || !message.trim()) {
       return res.status(400).json({ error: '消息内容不能为空' });
     }
+    // Store in DB
+    await supabase.from('feedback').insert({
+      name: (name || '').trim(),
+      email: (email || '').trim(),
+      message: message.trim(),
+      page: page || '',
+    });
+    // Also send email
     sendFeedbackEmail({ name, email, message, page });
     res.json({ success: true });
   } catch (err) {
