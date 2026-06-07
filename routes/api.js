@@ -77,8 +77,13 @@ apiRouter.post('/track', async (req, res) => {
 apiRouter.post('/subscribe', async (req, res) => {
   try {
     const { email, artist } = req.body;
-    if (!email || !email.includes('@') || !artist) {
+    if (!email || !artist) {
       return res.status(400).json({ error: '邮箱和艺人不能为空' });
+    }
+    // Basic email validation: must have @, domain must have . with valid TLD
+    const emailMatch = email.match(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/);
+    if (!emailMatch) {
+      return res.status(400).json({ error: '请输入有效的邮箱地址' });
     }
     const { data: existing } = await supabase.from('subscriptions').select('*').eq('email', email).eq('artist', artist);
     if (existing && existing.length > 0) return res.json({ success: true, message: '已订阅' });
