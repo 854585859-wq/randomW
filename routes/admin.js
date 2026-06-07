@@ -148,14 +148,28 @@ adminRouter.post('/venues/reorder', requireAdmin, async (req, res) => {
 // --- Stats (admin) ---
 adminRouter.get('/stats', requireAdmin, async (_req, res) => {
   try {
-    const { data: all } = await supabase.from('page_views').select('*');
-    const total = all ? all.length : 0;
-    const today = new Date().toISOString().split('T')[0];
-    const todayViews = all ? all.filter(v => v.created_at.startsWith(today)).length : 0;
+    // Get actual total count (not limited by Supabase default 1000)
+    const { count: total } = await supabase.from('page_views').select('*', { count: 'exact', head: true });
 
-    // Venue visit popularity: count page_views by venue
+    const today = new Date().toISOString().split('T')[0];
+
+    // Paginate to get all records for analysis (Supabase returns max 1000 per request)
+    let all = [];
+    let from = 0;
+    const BATCH = 1000;
+    while (true) {
+      const { data: batch } = await supabase.from('page_views').select('created_at, path').range(from, from + BATCH - 1).order('id', { ascending: false });
+      if (!batch || batch.length === 0) break;
+      all = all.concat(batch);
+      if (batch.length < BATCH) break;
+      from += BATCH;
+    }
+
+    const todayViews = all.filter(v => v.created_at.startsWith(today)).length;
+
+    // Venue visit popularity
     const venueVisitMap = {};
-    (all || []).forEach(v => {
+    all.forEach(v => {
       const match = v.path && v.path.match(/^venue\/(\d+)$/);
       if (match) {
         const venueId = parseInt(match[1]);
@@ -163,7 +177,6 @@ adminRouter.get('/stats', requireAdmin, async (_req, res) => {
       }
     });
 
-    // Join with venue names
     const { data: venues } = await supabase.from('venues').select('id, name');
     const venueNameMap = {};
     (venues || []).forEach(v => { venueNameMap[v.id] = v.name; });
@@ -172,7 +185,7 @@ adminRouter.get('/stats', requireAdmin, async (_req, res) => {
       .map(([id, count]) => ({ venue_id: parseInt(id), venue_name: venueNameMap[parseInt(id)] || '未知场馆', count }))
       .sort((a, b) => b.count - a.count);
 
-        // Concert count per venue
+    // Concert count per venue
     const { data: concerts } = await supabase.from('concerts').select('venue_id, venue_name');
     const concertCountMap = {};
     (concerts || []).forEach(c => {
@@ -181,7 +194,7 @@ adminRouter.get('/stats', requireAdmin, async (_req, res) => {
     });
     const concertStats = Object.values(concertCountMap).sort((a, b) => b.count - a.count);
 
-    res.json({ total, today: todayViews, venueStats, concertStats });
+    res.json({ total: total || 0, today: todayViews, venueStats, concertStats });
   } catch (err) {
     res.status(500).json({ error: '读取失败' });
   }
@@ -190,7 +203,19 @@ adminRouter.get('/stats', requireAdmin, async (_req, res) => {
 // --- IP Analytics (admin) ---
 adminRouter.get('/ip-stats', requireAdmin, async (_req, res) => {
   try {
-    const { data: all } = await supabase.from('page_views').select('ip, city, region, country, isp, created_at').order('id', { ascending: false }).limit(500);
+    // Paginate to get all records
+    let all = [];
+    let from = 0;
+    const BATCH = 1000;
+    while (true) {
+      const { data: batch } = await supabase.from('page_views')
+        .select('ip, city, region, country, isp, created_at')
+        .range(from, from + BATCH - 1).order('id', { ascending: false });
+      if (!batch || batch.length === 0) break;
+      all = all.concat(batch);
+      if (batch.length < BATCH) break;
+      from += BATCH;
+    }
 
     // City distribution
     const cityMap = {};
@@ -199,17 +224,12 @@ adminRouter.get('/ip-stats', requireAdmin, async (_req, res) => {
     // Top IPs
     const ipMap = {};
 
-    (all || []).forEach(v => {
-      // City
+    all.forEach(v => {
       const cityKey = [v.city, v.region, v.country].filter(Boolean).join(', ') || '未知';
       cityMap[cityKey] = (cityMap[cityKey] || 0) + 1;
 
-      // ISP
-      if (v.isp) {
-        ispMap[v.isp] = (ispMap[v.isp] || 0) + 1;
-      }
+      if (v.isp) ispMap[v.isp] = (ispMap[v.isp] || 0) + 1;
 
-      // IP
       if (v.ip) {
         if (!ipMap[v.ip]) {
           ipMap[v.ip] = { ip: v.ip, city: v.city || '', region: v.region || '', country: v.country || '', isp: v.isp || '', count: 0 };
@@ -218,20 +238,12 @@ adminRouter.get('/ip-stats', requireAdmin, async (_req, res) => {
       }
     });
 
-    const cities = Object.entries(cityMap)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count);
+    const cities = Object.entries(cityMap).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+    const isps = Object.entries(ispMap).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+    const topIPs = Object.values(ipMap).sort((a, b) => b.count - a.count).slice(0, 20);
 
-    const isps = Object.entries(ispMap)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count);
-
-    const topIPs = Object.values(ipMap)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 20);
-
-    const withIP = (all || []).filter(v => v.ip).length;
-    const total = (all || []).length;
+    const withIP = all.filter(v => v.ip).length;
+    const total = all.length;
 
     res.json({ cities, isps, topIPs, withIP, total });
   } catch (err) {
