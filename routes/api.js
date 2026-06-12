@@ -6,12 +6,26 @@ import { verify, COOKIE_NAME } from '../middleware/auth.js';
 
 export const apiRouter = Router();
 
+// Simple in-memory cache to avoid hitting slow Supabase on every request
+const cache = new Map();
+const CACHE_TTL = 60_000; // 1 minute
+
 // GET /api/concerts
 apiRouter.get('/concerts', async (_req, res) => {
   try {
+    const cached = cache.get('concerts');
+    if (cached && Date.now() - cached.ts < CACHE_TTL) {
+      res.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+      return res.json(cached.data);
+    }
     const { data } = await supabase.from('concerts').select('*').order('date');
+    cache.set('concerts', { data: data || [], ts: Date.now() });
+    res.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
     res.json(data || []);
   } catch (err) {
+    // Serve stale cache on Supabase failure
+    const stale = cache.get('concerts');
+    if (stale) return res.json(stale.data);
     res.status(500).json({ error: '读取演唱会数据失败' });
   }
 });
@@ -19,9 +33,18 @@ apiRouter.get('/concerts', async (_req, res) => {
 // GET /api/venues
 apiRouter.get('/venues', async (_req, res) => {
   try {
+    const cached = cache.get('venues');
+    if (cached && Date.now() - cached.ts < CACHE_TTL) {
+      res.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+      return res.json(cached.data);
+    }
     const { data } = await supabase.from('venues').select('*').order('sort_order').order('name');
+    cache.set('venues', { data: data || [], ts: Date.now() });
+    res.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
     res.json(data || []);
   } catch (err) {
+    const stale = cache.get('venues');
+    if (stale) return res.json(stale.data);
     res.status(500).json({ error: '读取场馆数据失败' });
   }
 });
