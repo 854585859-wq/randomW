@@ -117,6 +117,39 @@ apiRouter.post('/subscribe', async (req, res) => {
   }
 });
 
+// DEBUG — remove after verifying env vars
+apiRouter.get('/debug-email', async (_req, res) => {
+  const info = {
+    DEV_EMAIL: process.env.DEV_EMAIL || 'NOT SET',
+    SMTP_USER: process.env.SMTP_USER || 'NOT SET',
+    SMTP_HOST: process.env.SMTP_HOST || 'NOT SET',
+    SMTP_PASS: process.env.SMTP_PASS ? '***SET***' : 'NOT SET',
+  };
+  // Try sending test email
+  let result = 'not attempted';
+  try {
+    if (process.env.SMTP_PASS) {
+      const nodemailer = (await import('nodemailer')).default;
+      const t = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      });
+      await t.sendMail({
+        from: process.env.SMTP_USER,
+        to: process.env.DEV_EMAIL,
+        subject: '[诊断] 邮件测试',
+        text: '环境变量恢复，邮件功能正常！',
+      });
+      result = 'email sent OK';
+    } else {
+      result = 'SMTP_PASS not set, email skipped';
+    }
+  } catch(e) { result = 'send failed: ' + e.message; }
+  res.json({ ...info, result });
+});
+
 // POST /api/user-feedback
 apiRouter.post('/user-feedback', async (req, res) => {
   try {
