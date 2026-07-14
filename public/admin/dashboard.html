@@ -353,6 +353,60 @@
           </div>
         </div>`;
 
+        // Daily stats table
+        try {
+          const daily = await api('/api/admin/daily-stats?days=30');
+          if (daily && daily.length > 0) {
+            const maxDaily = Math.max(...daily.map(d => d.count), 1);
+            html += `<div class="card" style="margin-top:1.25rem;">
+              <h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">📅 每日访问统计（近30天）</h3>
+              <div style="overflow-x:auto;">
+              <table style="font-size:0.72rem;">
+                <thead><tr><th>日期</th><th>访问量</th><th>趋势</th></tr></thead>
+                <tbody>
+                  ${daily.map(d => {
+                    const barWidth = Math.round(d.count / maxDaily * 100);
+                    const isToday = d.date === new Date().toISOString().split('T')[0];
+                    return `<tr style="${isToday ? 'font-weight:bold;' : ''}">
+                      <td style="white-space:nowrap;">${d.date}${isToday ? ' ⬅️' : ''}</td>
+                      <td style="text-align:right;">${d.count}</td>
+                      <td style="width:100%;"><div style="background:var(--line);height:14px;border-radius:3px;overflow:hidden;"><div style="background:${d.count > 0 ? 'var(--accent)' : 'transparent'};height:100%;width:${barWidth}%;min-width:${d.count > 0 ? '2px' : '0'};border-radius:3px;"></div></div></td>
+                    </tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+              </div>
+            </div>`;
+          }
+        } catch(e) { /* skip daily stats */ }
+
+        // Monthly stats table
+        try {
+          const monthly = await api('/api/admin/monthly-stats?months=12');
+          if (monthly && monthly.length > 0) {
+            const maxMonthly = Math.max(...monthly.map(d => d.count), 1);
+            html += `<div class="card" style="margin-top:1.25rem;">
+              <h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">📊 每月访问统计（近12个月）</h3>
+              <div style="overflow-x:auto;">
+              <table style="font-size:0.72rem;">
+                <thead><tr><th>月份</th><th>访问量</th><th>趋势</th></tr></thead>
+                <tbody>
+                  ${monthly.map(d => {
+                    const barWidth = Math.round(d.count / maxMonthly * 100);
+                    const isCurrentMonth = d.month === new Date().toISOString().slice(0, 7);
+                    return `<tr style="${isCurrentMonth ? 'font-weight:bold;' : ''}">
+                      <td style="white-space:nowrap;">${d.month}${isCurrentMonth ? ' ⬅️' : ''}</td>
+                      <td style="text-align:right;">${d.count}</td>
+                      <td style="width:100%;"><div style="background:var(--line);height:14px;border-radius:3px;overflow:hidden;"><div style="background:${d.count > 0 ? 'var(--accent)' : 'transparent'};height:100%;width:${barWidth}%;min-width:${d.count > 0 ? '2px' : '0'};border-radius:3px;"></div></div></td>
+                    </tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+              </div>
+            </div>`;
+          }
+        } catch(e) { /* skip monthly stats */ }
+
         // Venue visit ranking
         if (s.venueStats && s.venueStats.length > 0) {
           html += `<div class="card" style="margin-top:1.25rem;">

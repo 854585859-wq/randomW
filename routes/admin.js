@@ -200,6 +200,87 @@ adminRouter.get('/stats', requireAdmin, async (_req, res) => {
   }
 });
 
+// --- Daily Stats (admin) ---
+adminRouter.get('/daily-stats', requireAdmin, async (req, res) => {
+  try {
+    const days = parseInt(req.query.days) || 30;
+
+    // Fetch all page_views with pagination
+    let all = [];
+    let from = 0;
+    const BATCH = 1000;
+    while (true) {
+      const { data: batch } = await supabase.from('page_views').select('created_at').range(from, from + BATCH - 1).order('id', { ascending: false });
+      if (!batch || batch.length === 0) break;
+      all = all.concat(batch);
+      if (batch.length < BATCH) break;
+      from += BATCH;
+    }
+
+    // Build date range
+    const result = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      result.push({ date: dateStr, count: 0 });
+    }
+
+    // Count per day
+    all.forEach(v => {
+      const dateStr = v.created_at ? v.created_at.split('T')[0] : null;
+      const entry = result.find(r => r.date === dateStr);
+      if (entry) entry.count++;
+    });
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: '读取失败' });
+  }
+});
+
+// --- Monthly Stats (admin) ---
+adminRouter.get('/monthly-stats', requireAdmin, async (req, res) => {
+  try {
+    const months = parseInt(req.query.months) || 12;
+
+    // Fetch all page_views with pagination
+    let all = [];
+    let from = 0;
+    const BATCH = 1000;
+    while (true) {
+      const { data: batch } = await supabase.from('page_views').select('created_at').range(from, from + BATCH - 1).order('id', { ascending: false });
+      if (!batch || batch.length === 0) break;
+      all = all.concat(batch);
+      if (batch.length < BATCH) break;
+      from += BATCH;
+    }
+
+    // Build month range
+    const result = [];
+    const now = new Date();
+    for (let i = months - 1; i >= 0; i--) {
+      const y = now.getFullYear();
+      const m = now.getMonth() - i;
+      const d = new Date(y, m, 1);
+      const monthStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      result.push({ month: monthStr, count: 0 });
+    }
+
+    // Count per month
+    all.forEach(v => {
+      if (!v.created_at) return;
+      const monthStr = v.created_at.slice(0, 7); // "2026-07"
+      const entry = result.find(r => r.month === monthStr);
+      if (entry) entry.count++;
+    });
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: '读取失败' });
+  }
+});
+
 // --- IP Analytics (admin) ---
 adminRouter.get('/ip-stats', requireAdmin, async (_req, res) => {
   try {
