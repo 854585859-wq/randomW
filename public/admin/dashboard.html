@@ -441,47 +441,6 @@
           </div>`;
         }
 
-        // IP & Location stats
-        try {
-          const ipStats = await api('/api/admin/ip-stats');
-          html += `<div class="card" style="margin-top:1.25rem;">
-            <h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">🌍 IP 归属地分析 <span style="font-weight:300;font-size:0.65rem;color:var(--ink-25);">（${ipStats.withIP}/${ipStats.total} 条有 IP）</span></h3>`;
-
-          // Cities
-          if (ipStats.cities && ipStats.cities.length > 0) {
-            html += '<div style="display:flex;gap:2rem;flex-wrap:wrap;">';
-            html += '<div style="flex:1;min-width:220px;"><h4 style="font-size:0.72rem;color:var(--ink-50);margin-bottom:0.5rem;">📍 城市分布</h4><table>';
-            ipStats.cities.slice(0, 10).forEach(c => {
-              html += `<tr><td>${escHtml(c.name)}</td><td style="text-align:right;">${c.count} 次</td></tr>`;
-            });
-            html += '</table></div>';
-
-            // ISPs
-            if (ipStats.isps && ipStats.isps.length > 0) {
-              html += '<div style="flex:1;min-width:220px;"><h4 style="font-size:0.72rem;color:var(--ink-50);margin-bottom:0.5rem;">📡 运营商</h4><table>';
-              ipStats.isps.slice(0, 10).forEach(isp => {
-                html += `<tr><td style="font-size:0.7rem;">${escHtml(isp.name)}</td><td style="text-align:right;">${isp.count} 次</td></tr>`;
-              });
-              html += '</table></div>';
-            }
-            html += '</div>';
-          }
-
-          // Top IPs
-          if (ipStats.topIPs && ipStats.topIPs.length > 0) {
-            html += '<h4 style="font-size:0.72rem;color:var(--ink-50);margin:1rem 0 0.5rem;">👤 活跃 IP</h4>';
-            html += '<div style="max-height:200px;overflow-y:auto;"><table>';
-            html += '<thead><tr><th>IP</th><th>归属地</th><th>运营商</th><th>次数</th></tr></thead><tbody>';
-            ipStats.topIPs.slice(0, 15).forEach(ip => {
-              const loc = [ip.city, ip.region, ip.country].filter(Boolean).join(' ') || '未知';
-              html += `<tr><td style="font-family:monospace;font-size:0.7rem;">${escHtml(ip.ip)}</td><td style="font-size:0.7rem;">${escHtml(loc)}</td><td style="font-size:0.68rem;">${escHtml(ip.isp || '?')}</td><td style="text-align:right;">${ip.count}</td></tr>`;
-            });
-            html += '</tbody></table></div>';
-          }
-
-          html += '</div>';
-        } catch(e) { /* skip IP stats if not available */ }
-
         return html;
       } catch(e) { return '<div class="empty"><p>加载失败</p></div>'; }
     }
