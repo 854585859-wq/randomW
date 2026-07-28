@@ -361,6 +361,42 @@ adminRouter.get('/subscriptions', requireAdmin, async (_req, res) => {
   }
 });
 
+adminRouter.post('/subscriptions/:id/push', requireAdmin, async (req, res) => {
+  try {
+    const { data: subs } = await supabase.from('subscriptions').select('*').eq('id', req.params.id);
+    if (!subs || subs.length === 0) {
+      return res.status(404).json({ error: '订阅不存在' });
+    }
+    const sub = subs[0];
+
+    const today = new Date().toISOString().split('T')[0];
+    const { data: concerts } = await supabase.from('concerts').select('*').gte('date', today).order('date');
+
+    const matching = (concerts || []).filter(c =>
+      c.artist.toLowerCase().includes(sub.artist.toLowerCase()) ||
+      sub.artist.toLowerCase().includes(c.artist.toLowerCase())
+    );
+
+    if (matching.length === 0) {
+      return res.status(404).json({ error: `没有找到 ${sub.artist} 的 upcoming 演出` });
+    }
+
+    for (const c of matching) {
+      const dateStr = c.end_date ? `${c.date} → ${c.end_date}` : c.date;
+      await sendSubscriptionEmail({
+        to: sub.email, artist: c.artist, dateStr, venueName: c.venue_name, description: c.description || '',
+      });
+    }
+
+    await supabase.from('subscriptions').delete().eq('id', sub.id);
+
+    res.json({ success: true, sent: matching.length, artist: sub.artist, email: sub.email });
+  } catch (err) {
+    console.error('Push error:', err.message);
+    res.status(500).json({ error: '推送失败' });
+  }
+});
+
 adminRouter.delete('/subscriptions/:id', requireAdmin, async (req, res) => {
   try {
     await supabase.from('subscriptions').delete().eq('id', req.params.id);
