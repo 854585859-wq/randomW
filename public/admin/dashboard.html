@@ -460,7 +460,7 @@
               <td>${escHtml(s.email)}</td><td><strong>${escHtml(s.artist)}</strong></td>
               <td>${new Date(s.created_at).toLocaleDateString('zh-CN')}</td>
               <td style="white-space:nowrap;">
-                <button class="btn btn-sm btn-primary" onclick="pushSub(${s.id}, '${escHtml(s.artist)}')">推送</button>
+                <button class="btn btn-sm btn-primary" onclick="pushSub(${s.id}, '${escHtml(s.email)}')">推送</button>
                 <button class="btn btn-sm btn-danger" onclick="deleteSub(${s.id})">删除</button></td></tr>`).join('')}
           </tbody></table>`;
         }
@@ -469,8 +469,8 @@
       return html;
     }
 
-    async function pushSub(id, artist) {
-      if (!confirm(`确定向「${artist}」的订阅者发送推送邮件？`)) return;
+    async function pushSub(id, email) {
+      if (!confirm(`是否向订阅者 ${email} 发送推送邮件？`)) return;
       try {
         const result = await api(`/api/admin/subscriptions/${id}/push`, { method: 'POST' });
         alert(`推送成功！已发送到 ${result.email}`);
