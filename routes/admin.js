@@ -4,6 +4,12 @@ import { readData, writeData } from '../utils/data.js';
 import { requireAdmin, setAdminCookie, clearAdminCookie, verify, COOKIE_NAME } from '../middleware/auth.js';
 import { sendSubscriptionEmail } from '../utils/mail.js';
 import { supabase } from '../lib/supabase.js';
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const adminRouter = Router();
 
@@ -404,4 +410,54 @@ adminRouter.delete('/subscriptions/:id', requireAdmin, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: '删除失败' });
   }
+});
+
+// --- Build mini-tool zip (admin) ---
+adminRouter.post('/build-minitool', requireAdmin, async (_req, res) => {
+  try {
+    const { data: concerts } = await supabase.from('concerts').select('*').order('date');
+    const { data: venues } = await supabase.from('venues').select('*').order('sort_order').order('name');
+
+    const cleanConcerts = concerts.map(c => ({
+      id: c.id, date: c.date, end_date: c.end_date, artist: c.artist,
+      venue_id: c.venue_id, venue_name: c.venue_name, description: c.description || '',
+    }));
+    const cleanVenues = venues.map(v => ({
+      id: v.id, name: v.name, sort_order: v.sort_order,
+    }));
+
+    const distDir = path.join(__dirname, '..', 'dist');
+    const templateDir = path.join(__dirname, '..', 'minitool');
+    const buildDir = path.join(distDir, 'concert-calendar');
+
+    fs.mkdirSync(buildDir, { recursive: true });
+
+    // Copy template files
+    fs.copyFileSync(path.join(templateDir, 'index.html'), path.join(buildDir, 'index.html'));
+    fs.copyFileSync(path.join(templateDir, 'app.js'), path.join(buildDir, 'app.js'));
+
+    // Write data.js with fresh data
+    const dataJS = `window.__DATA__ = ${JSON.stringify({ concerts: cleanConcerts, venues: cleanVenues })};`;
+    fs.writeFileSync(path.join(buildDir, 'data.js'), dataJS);
+
+    // Zip
+    const zipPath = path.join(distDir, 'concert-calendar.zip');
+    if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+    execSync(`cd "${buildDir}" && zip -r "${zipPath}" . -x '*.DS_Store'`, { stdio: 'pipe' });
+
+    const size = (fs.statSync(zipPath).size / 1024).toFixed(0);
+    res.json({ success: true, count: cleanConcerts.length, venues: cleanVenues.length, size: `${size} KB` });
+  } catch (err) {
+    console.error('Build mini-tool error:', err.message);
+    res.status(500).json({ error: '构建失败: ' + err.message });
+  }
+});
+
+// Download built mini-tool zip
+adminRouter.get('/download-minitool', requireAdmin, (_req, res) => {
+  const zipPath = path.join(__dirname, '..', 'dist', 'concert-calendar.zip');
+  if (!fs.existsSync(zipPath)) {
+    return res.status(404).json({ error: '请先构建小工具' });
+  }
+  res.download(zipPath, 'concert-calendar.zip');
 });

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Concert Info</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5f0e8;
+  --paper: #faf7f2;
+  --ink: #1f1f1f;
+  --ink-50: #5c5c5c;
+  --ink-25: #9e9e9e;
+  --line: #e0dbd0;
+  --accent: #c4875c;
+  --accent-deep: #8b3a1f;
+  --serif: 'Songti SC', 'STSong', 'SimSun', 'Times New Roman', serif;
+  --serif-display: 'Songti SC', 'STSong', 'Times New Roman', serif;
+  --sans: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', -apple-system, sans-serif;
+}
+
+html, body { height: 100%; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+a { color: var(--ink); text-decoration: none; }
+
+/* Top Bar */
+.topbar { position: relative; }
+.topbar::before {
+  content: '🎫';
+  position: absolute; top: 1rem; left: 50%; transform: translateX(-50%) rotate(-8deg);
+  font-size: 1.8rem; opacity: 0.65; pointer-events: none; z-index: 1;
+}
+.topbar-inner { position: relative; }
+.topbar-inner::before {
+  content: '';
+  position: absolute; top: 0.6rem; left: 50%; transform: translateX(-50%) rotate(-1.5deg);
+  width: 280px; height: 56px;
+  background: repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.6) 20px, rgba(255,255,255,0.6) 22px);
+  border: 0.5px solid rgba(196,135,92,0.2);
+  z-index: 0; pointer-events: none;
+}
+.topbar {
+  background-color: var(--paper);
+  background-image: radial-gradient(circle, #d0c8b8 3px, transparent 3px);
+  background-size: 24px 24px;
+  border-bottom: 0.5px solid var(--line);
+  text-align: center;
+}
+.topbar-inner {
+  max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 0;
+  position: relative;
+}
+.topbar-logo {
+  font-family: var(--serif-display); font-size: 4rem; font-weight: 300;
+  letter-spacing: 0.08em; color: var(--ink); font-style: italic;
+  display: block; margin-bottom: 0.5rem; line-height: 1;
+}
+.topbar-subtitle {
+  font-family: var(--sans); font-size: 0.75rem; font-weight: 300;
+  letter-spacing: 0.25em; text-transform: uppercase; color: var(--ink-25);
+  margin-bottom: 1.4rem;
+}
+.topbar-divider {
+  width: 50px; height: 2px; background: var(--accent);
+  margin: 0 auto 1.2rem;
+}
+.topbar-links {
+  display: flex; gap: 3rem; align-items: center; justify-content: center;
+  padding-bottom: 1rem; position: relative;
+}
+.topbar-links::before {
+  content: '';
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 160px; height: 2px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 8px, transparent 8px, transparent 16px);
+  opacity: 0.4;
+}
+.topbar-links a {
+  font-size: 0.9rem; font-weight: 400; color: var(--ink-25);
+  transition: color .2s; letter-spacing: 0.06em;
+  padding-bottom: 0.5rem; border-bottom: 2px solid transparent; cursor: pointer;
+}
+.topbar-links a:hover { color: var(--ink-50); }
+.topbar-links a.active { color: var(--ink); border-bottom-color: var(--accent); }
+
+/* Container */
+.container { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+.section-title {
+  font-family: var(--serif); font-size: 1.1rem; font-weight: 400; font-style: italic;
+  margin-bottom: 1.2rem; color: var(--ink-50);
+  position: relative; display: inline-block;
+  padding: 0.2rem 0.8rem; margin-left: -0.3rem;
+}
+.section-title::before {
+  content: '';
+  position: absolute; top: -0.15rem; left: -0.1rem; right: -0.1rem; bottom: -0.15rem;
+  background: var(--accent); opacity: 0.12;
+  transform: rotate(-0.5deg); z-index: -1;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.5rem 1.2rem; border: 0.5px solid var(--line);
+  font-size: 0.76rem; font-family: var(--sans); font-weight: 300;
+  cursor: pointer; transition: all .25s; background: transparent; color: var(--ink);
+  letter-spacing: 0.02em; touch-action: manipulation;
+}
+.btn:hover { border-color: var(--ink-25); background: rgba(0,0,0,0.02); }
+.btn-primary { background: var(--ink); color: #fff; border-color: var(--ink); font-weight: 400; }
+.btn-primary:hover { background: #444; border-color: #444; }
+.btn-sm { padding: 0.3rem 0.85rem; font-size: 0.7rem; }
+.btn:active { opacity: 0.7; }
+
+/* Forms */
+.form-group { margin-bottom: 0.9rem; }
+.form-group label {
+  display: block; font-size: 0.72rem; font-weight: 400; color: var(--ink-50); margin-bottom: 0.3rem;
+  letter-spacing: 0.02em;
+}
+.form-input {
+  width: 100%; padding: 0.55rem 0.8rem; border: 0.5px solid var(--line);
+  font-size: 0.82rem; font-family: var(--sans); font-weight: 300;
+  background: var(--paper); transition: border-color .2s; color: var(--ink);
+}
+.form-input:focus { outline: none; border-color: var(--ink-25); }
+
+/* Calendar */
+.calendar-header {
+  display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1.2rem;
+}
+.calendar-header h2 { font-family: var(--serif); font-size: 1.15rem; font-weight: 400; font-style: italic; }
+.calendar-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  border: 0.5px solid var(--line); background: var(--paper);
+  position: relative;
+}
+.calendar-grid::before {
+  content: '✿';
+  position: absolute; top: -0.6rem; right: -0.3rem;
+  font-size: 1.1rem; opacity: 0.55; pointer-events: none; z-index: 2;
+}
+.calendar-day-header {
+  background: var(--paper); padding: 0.55rem 0.25rem; text-align: center;
+  font-size: 0.68rem; font-weight: 400; color: var(--ink-25);
+  border-bottom: 0.5px solid var(--line); letter-spacing: 0.03em;
+}
+.calendar-cell {
+  background: var(--paper); min-height: 85px; padding: 0.4rem; font-size: 0.73rem;
+  border-right: 0.5px solid rgba(0,0,0,0.02); border-bottom: 0.5px solid rgba(0,0,0,0.02);
+}
+.calendar-cell:nth-child(7n) { border-right: none; }
+.calendar-cell.other-month { background: #f3efe8; color: var(--ink-25); }
+.calendar-cell .day-num { font-size: 0.68rem; color: var(--ink-25); margin-bottom: 0.25rem; }
+.calendar-cell.today .day-num {
+  background: var(--ink); color: var(--paper); display: inline-block;
+  width: 20px; height: 20px; text-align: center; line-height: 20px;
+}
+.calendar-event {
+  font-size: 0.62rem; color: var(--ink);
+  padding: 0.12rem 0.35rem; margin-bottom: 0.1rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+  font-weight: 300; transition: color .2s;
+}
+.calendar-event:hover { opacity: 0.8; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.25); backdrop-filter: blur(1px);
+  display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem;
+}
+.modal {
+  background: var(--paper); padding: 2rem; max-width: 400px; width: 100%;
+  box-shadow: 0 2px 30px rgba(0,0,0,0.04); animation: fadeUp 0.3s ease-out;
+  position: relative; overflow: visible;
+}
+.modal::after {
+  content: '📎';
+  position: absolute; top: -0.7rem; right: 1.5rem;
+  font-size: 1.1rem; opacity: 0.55; pointer-events: none;
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.modal h3 {
+  font-family: var(--serif); font-size: 1.1rem; font-weight: 400; font-style: italic;
+  margin-bottom: 1.2rem; padding-bottom: 0.6rem; border-bottom: 0.5px solid var(--line);
+}
+.modal-close { float: right; background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--ink-25); }
+.modal-close:hover { color: var(--ink); }
+
+/* Footer */
+.page-footer {
+  text-align: center; padding: 1.5rem 0; margin-top: 2.5rem;
+  border-top: 0.5px solid var(--line); position: relative;
+}
+.page-footer::after {
+  content: '· · ·';
+  display: block; margin-top: 0.3rem;
+  font-size: 0.75rem; letter-spacing: 0.3em; color: var(--accent); opacity: 0.5;
+}
+.footer-social {
+  font-size: 0.73rem; color: var(--ink-25); font-weight: 300; letter-spacing: 0.02em;
+}
+
+/* Venue buttons */
+.venue-btn-group { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.venue-btn { font-size: 0.73rem; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .topbar-inner { padding: 1.5rem 1rem 0; }
+  .topbar-logo { font-size: 2.4rem; }
+  .topbar-links { gap: 1.2rem; }
+  .topbar-links a { font-size: 0.78rem; }
+  .topbar-subtitle { font-size: 0.68rem; }
+  .container { padding: 1rem 0.75rem 3rem; }
+  .calendar-header { flex-wrap: wrap; gap: 0.5rem; }
+  .calendar-header h2 { font-size: 0.95rem; }
+  .calendar-cell { min-height: 70px; padding: 0.25rem; }
+  .calendar-day-header { padding: 0.4rem 0; font-size: 0.6rem; }
+  .calendar-event { font-size: 0.58rem; padding: 0.15rem 0.3rem; margin-bottom: 0.08rem; }
+  .btn { min-height: 36px; padding: 0.5rem 0.9rem; }
+  .btn-sm { min-height: 32px; padding: 0.3rem 0.7rem; }
+  .modal { max-width: 100%; margin: 0 0.5rem; padding: 1.2rem; border-radius: 0; }
+  .modal h3 { font-size: 0.95rem; }
+  .venue-btn-group { gap: 0.5rem; }
+  .venue-btn { font-size: 0.78rem; min-height: 38px; padding: 0.5rem 1rem; }
+  .form-input { font-size: 0.9rem; padding: 0.6rem 0.75rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="#" class="topbar-logo">Concert Info</a>
+    <div style="position:absolute;top:0;right:12%;font-size:1.2rem;opacity:0.5;transform:rotate(8deg);pointer-events:none;z-index:5;">✨</div>
+    <div class="topbar-subtitle">Korea Concert Calendar</div>
+    <div class="topbar-divider"></div>
+    <nav class="topbar-links">
+      <a href="#" class="active">日历</a>
+      <a href="#">场馆</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Calendar View -->
+  <div id="mainCalendar">
+    <div class="calendar-header">
+      <h2 id="calTitle"></h2>
+      <div>
+        <button class="btn btn-sm" id="btnPrev">‹</button>
+        <button class="btn btn-sm" id="btnNext">›</button>
+      </div>
+    </div>
+    <div class="calendar-grid" id="calGrid"></div>
+  </div>
+
+  <!-- Venues View -->
+  <div id="mainVenues" style="display:none;">
+    <h2 class="section-title">场馆档期</h2>
+    <div class="form-group">
+      <label>选择场馆</label>
+      <div id="venueButtons" class="venue-btn-group"></div>
+    </div>
+    <div id="scheduleArea"></div>
+  </div>
+
+  <!-- Action buttons -->
+  <div style="margin-top: 2rem; text-align: center; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+    <button class="btn" id="btnFeedback">提供信息</button>
+    <button class="btn" id="btnSubscribe">订阅艺人</button>
+    <button class="btn" id="btnShare">📤 分享</button>
+  </div>
+
+  <div class="page-footer">
+    <p class="footer-social">韩国演唱会日历 · concert-kr.space</p>
+    <div style="font-size:0.65rem;color:var(--accent);opacity:0.35;letter-spacing:0.3em;margin-top:0.3rem;">✿ · · · ✿ · · · ✿</div>
+  </div>
+</div>
+
+<script src="./data.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

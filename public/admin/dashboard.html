@@ -16,6 +16,7 @@
       <nav class="topbar-links">
         <a href="/">日历</a>
         <a href="/venues">场馆</a>
+        <button class="btn btn-sm" id="btnBuildTool" style="font-size:0.68rem;margin-right:0.5rem;">🛠️ 构建小工具</button>
         <button class="btn btn-sm" onclick="logout()" style="font-size:0.68rem;">登出</button>
       </nav>
     </div>
@@ -55,6 +56,31 @@
     async function logout() {
       await api('/api/admin/logout', { method: 'POST' });
       location.href = '/admin';
+    }
+
+    // --- Mini-tool build ---
+    function initBuildButton() {
+      document.getElementById('btnBuildTool').addEventListener('click', async () => {
+        if (!confirm('将从数据库拉取最新数据，重新打包小工具 zip。\n\n确定继续？')) return;
+        var btn = document.getElementById('btnBuildTool');
+        btn.textContent = '⏳ 构建中...';
+        btn.disabled = true;
+        try {
+          var result = await api('/api/admin/build-minitool', { method: 'POST' });
+          alert('构建成功！\n\n' + result.count + ' 场演出 / ' + result.venues + ' 个场馆\n大小: ' + result.size + '\n\n即将开始下载。');
+          // Trigger download
+          var a = document.createElement('a');
+          a.href = '/api/admin/download-minitool';
+          a.download = 'concert-calendar.zip';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        } catch(err) {
+          alert('构建失败: ' + err.message);
+        }
+        btn.textContent = '🛠️ 构建小工具';
+        btn.disabled = false;
+      });
     }
 
     // --- State ---
@@ -537,7 +563,7 @@
       await loadData();
     }
 
-    checkAuth().then(() => loadData());
+    checkAuth().then(() => { loadData(); initBuildButton(); });
   </script>
 </body>
 </html>
