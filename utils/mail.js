@@ -88,5 +88,6 @@ export async function sendSubscriptionEmail({ to, artist, dateStr, venueName, de
     console.log('Subscription email sent to', to);
   } catch (err) {
     console.error('Failed to send subscription email:', err.message);
+    throw err;
   }
 }

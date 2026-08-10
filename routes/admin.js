@@ -64,11 +64,22 @@ adminRouter.post('/concerts', requireAdmin, async (req, res) => {
           s.artist.toLowerCase().includes(artist.toLowerCase())
         );
         console.log(`Found ${matching.length} subscribers for ${artist}`);
+        const dateStr = endDate ? `${date} → ${endDate}` : date;
         for (const s of matching) {
-          const dateStr = endDate ? `${date} → ${endDate}` : date;
-          await sendSubscriptionEmail({
-            to: s.email, artist, dateStr, venueName, description: description || '',
-          });
+          try {
+            await sendSubscriptionEmail({
+              to: s.email, artist, dateStr, venueName, description: description || '',
+            });
+            // Log to sent_emails
+            await supabase.from('sent_emails').insert({
+              email: s.email, artist: s.artist, concert_artist: artist,
+              concert_date: dateStr, venue_name: venueName, type: 'subscription',
+            });
+          } catch (mailErr) {
+            console.error('Send email failed:', mailErr.message);
+            // Log failure
+            try { await supabase.from('sent_emails').insert({ email: s.email, artist: s.artist, concert_artist: artist, concert_date: dateStr, venue_name: venueName, type: 'subscription_failed' }); } catch {}
+          }
         }
         if (matching.length > 0) {
           await supabase.from('subscriptions').delete().in('id', matching.map(s => s.id));
@@ -389,9 +400,18 @@ adminRouter.post('/subscriptions/:id/push', requireAdmin, async (req, res) => {
 
     for (const c of matching) {
       const dateStr = c.end_date ? `${c.date} → ${c.end_date}` : c.date;
-      await sendSubscriptionEmail({
-        to: sub.email, artist: c.artist, dateStr, venueName: c.venue_name, description: c.description || '',
-      });
+      try {
+        await sendSubscriptionEmail({
+          to: sub.email, artist: c.artist, dateStr, venueName: c.venue_name, description: c.description || '',
+        });
+        await supabase.from('sent_emails').insert({
+          email: sub.email, artist: sub.artist, concert_artist: c.artist,
+          concert_date: dateStr, venue_name: c.venue_name, type: 'subscription',
+        });
+      } catch (mailErr) {
+        console.error('Push send failed:', mailErr.message);
+        try { await supabase.from('sent_emails').insert({ email: sub.email, artist: sub.artist, concert_artist: c.artist, concert_date: dateStr, venue_name: c.venue_name, type: 'subscription_failed' }); } catch {}
+      }
     }
 
     await supabase.from('subscriptions').delete().eq('id', sub.id);
