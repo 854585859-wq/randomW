@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小红书封面</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+    background: #3a3a3a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+  }
+
+  .cover {
+    width: 1080px;
+    height: 1440px;
+    background: linear-gradient(180deg, #2a2218 0%, #1a1510 40%, #3d2b1a 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Background texture */
+  .cover::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 80%, rgba(196,135,92,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(218,180,140,0.1) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px;
+    pointer-events: none;
+  }
+
+  /* Top accent line */
+  .top-line {
+    position: absolute; top: 0; left: 0; right: 0; height: 6px;
+    background: linear-gradient(90deg, #c4875c, #e0b894, #c4875c);
+  }
+
+  /* Content */
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 80px 80px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    border: 2px solid rgba(196,135,92,0.5);
+    color: #c4875c;
+    padding: 14px 40px;
+    font-size: 28px;
+    letter-spacing: 0.3em;
+    margin-bottom: 60px;
+    font-weight: 300;
+  }
+
+  /* Main headline */
+  .headline {
+    font-family: 'Songti SC', 'STSong', 'SimSun', serif;
+    font-size: 140px;
+    font-weight: 700;
+    color: #f5f0e8;
+    line-height: 1.05;
+    letter-spacing: 0.04em;
+    margin-bottom: 30px;
+  }
+
+  .headline-sub {
+    font-size: 88px;
+    font-weight: 300;
+    color: #c4875c;
+    letter-spacing: 0.1em;
+  }
+
+  /* Tagline */
+  .tagline {
+    font-size: 42px;
+    color: rgba(245,240,232,0.6);
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    margin-top: 50px;
+    margin-bottom: 80px;
+  }
+
+  /* Feature pills */
+  .features {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 80px;
+  }
+  .feature-pill {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 60px;
+    padding: 22px 48px;
+    font-size: 28px;
+    color: rgba(245,240,232,0.8);
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .feature-pill .icon { font-size: 40px; }
+
+  /* Bottom URL */
+  .url-bar {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 50px;
+    padding: 28px 70px;
+    font-size: 38px;
+    color: #e0b894;
+    letter-spacing: 0.1em;
+    font-weight: 300;
+  }
+
+  /* Decorative circles */
+  .deco {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(196,135,92,0.1);
+    pointer-events: none;
+  }
+  .deco-1 { width: 300px; height: 300px; top: -60px; right: -60px; }
+  .deco-2 { width: 200px; height: 200px; bottom: 180px; left: -40px; border-width: 0.5px; }
+  .deco-3 { width: 120px; height: 120px; bottom: 100px; right: 120px; border-color: rgba(255,255,255,0.06); }
+
+  /* Bottom text */
+  .bottom-text {
+    text-align: center;
+    padding: 0 80px 70px;
+    position: relative;
+    z-index: 1;
+  }
+  .bottom-text p {
+    font-size: 26px;
+    color: rgba(245,240,232,0.3);
+    letter-spacing: 0.08em;
+    font-weight: 300;
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="top-line"></div>
+
+  <!-- Decorative elements -->
+  <div class="deco deco-1"></div>
+  <div class="deco deco-2"></div>
+  <div class="deco deco-3"></div>
+
+  <div class="content">
+    <div class="badge">KOREA CONCERT</div>
+
+    <div class="headline">韩国</div>
+    <div class="headline-sub">演唱会日历</div>
+
+    <div class="tagline">查档期 · 找场馆 · 追星必备</div>
+
+    <div class="features">
+      <div class="feature-pill">
+        <span class="icon">📅</span> 月历视图
+      </div>
+      <div class="feature-pill">
+        <span class="icon">🏟️</span> 场馆档期
+      </div>
+      <div class="feature-pill">
+        <span class="icon">🔔</span> 艺人订阅
+      </div>
+      <div class="feature-pill">
+        <span class="icon">📱</span> 随时访问
+      </div>
+    </div>
+
+    <div class="url-bar">concert-kr.space</div>
+  </div>
+
+  <div class="bottom-text">
+    <p>纯 AI 生成 · 不懂代码但好用 ✨</p>
+  </div>
+</div>
+
+</body>
+</html>

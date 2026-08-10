@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concert Info · 海报</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f0e8;
+    --paper: #faf7f2;
+    --ink: #1f1f1f;
+    --ink-50: #5c5c5c;
+    --ink-25: #9e9e9e;
+    --line: #e0dbd0;
+    --accent: #c4875c;
+    --accent-deep: #8b3a1f;
+    --serif: 'Songti SC', 'STSong', 'SimSun', 'Times New Roman', serif;
+    --sans: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', -apple-system, sans-serif;
+  }
+
+  body {
+    background: #e8e3d8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: var(--sans);
+    padding: 2rem;
+  }
+
+  .poster {
+    width: 600px;
+    min-height: 850px;
+    background: var(--paper);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 60px rgba(0,0,0,0.08);
+    /* Paper texture */
+    background-image:
+      radial-gradient(circle, rgba(196,135,92,0.04) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* ── Top decorative strip ── */
+  .poster-top {
+    position: relative;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 2.5rem 3rem 2rem;
+    text-align: center;
+    overflow: hidden;
+  }
+  .poster-top::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50%;
+  }
+  .poster-top::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: -20px;
+    width: 80px; height: 80px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+
+  .poster-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    border: 0.5px solid rgba(255,255,255,0.3);
+    padding: 0.25rem 1rem;
+    margin-bottom: 1.5rem;
+    font-weight: 300;
+  }
+
+  .poster-title {
+    font-family: var(--serif);
+    font-size: 3.8rem;
+    font-weight: 300;
+    font-style: italic;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .poster-sub {
+    font-size: 0.72rem;
+    letter-spacing: 0.35em;
+    margin-top: 0.8rem;
+    opacity: 0.6;
+    font-weight: 300;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Tape over top/bottom seam ── */
+  .tape-strip {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1.5deg);
+    width: 200px;
+    height: 28px;
+    background: rgba(255,255,255,0.12);
+    border: 0.5px solid rgba(255,255,255,0.18);
+    z-index: 2;
+  }
+  .tape-strip.top { top: -14px; }
+  .tape-strip.bottom { bottom: -14px; }
+
+  /* ── Body ── */
+  .poster-body {
+    padding: 2.5rem 3rem;
+    position: relative;
+  }
+
+  /* ── Feature grid ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem 2rem;
+    margin: 1.5rem 0 2rem;
+  }
+  .feature-item {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+  }
+  .feature-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    width: 2.2rem;
+    text-align: center;
+  }
+  .feature-text h4 {
+    font-family: var(--serif);
+    font-size: 0.9rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: 0.2rem;
+  }
+  .feature-text p {
+    font-size: 0.7rem;
+    color: var(--ink-25);
+    line-height: 1.5;
+    font-weight: 300;
+  }
+
+  /* ── Divider ── */
+  .poster-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .poster-divider::before,
+  .poster-divider::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: var(--line);
+  }
+  .poster-divider span {
+    font-size: 0.65rem;
+    color: var(--ink-25);
+    letter-spacing: 0.2em;
+    font-weight: 300;
+  }
+
+  /* ── Stats row ── */
+  .stats-row {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    margin: 1.5rem 0;
+  }
+  .stat-num {
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--accent-deep);
+    letter-spacing: 0.04em;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+    color: var(--ink-25);
+    margin-top: 0.3rem;
+    letter-spacing: 0.1em;
+    font-weight: 300;
+  }
+
+  /* ── URL section ── */
+  .poster-url-box {
+    background: var(--bg);
+    border: 0.5px solid var(--line);
+    padding: 1.2rem;
+    text-align: center;
+    margin-top: 1.5rem;
+    position: relative;
+  }
+  /* Paperclip */
+  .poster-url-box::after {
+    content: '📎';
+    position: absolute;
+    top: -0.5rem;
+    right: 1.5rem;
+    font-size: 0.9rem;
+    opacity: 0.5;
+  }
+  .poster-url {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    font-weight: 400;
+  }
+  .poster-url-hint {
+    font-size: 0.62rem;
+    color: var(--ink-25);
+    margin-top: 0.3rem;
+    letter-spacing: 0.1em;
+    font-weight: 300;
+  }
+
+  /* ── Bottom ── */
+  .poster-bottom {
+    position: relative;
+    padding: 0 3rem 2.5rem;
+    text-align: center;
+  }
+  .poster-bottom::before {
+    content: '· · ·';
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.4em;
+    color: var(--accent);
+    opacity: 0.4;
+    margin-bottom: 0.8rem;
+  }
+  .poster-footer-text {
+    font-size: 0.62rem;
+    color: var(--ink-25);
+    letter-spacing: 0.08em;
+    font-weight: 300;
+    line-height: 1.8;
+  }
+
+  /* ── Corner decorations ── */
+  .corner-mark {
+    position: absolute;
+    font-size: 0.9rem;
+    opacity: 0.3;
+    z-index: 0;
+  }
+  .corner-mark.tl { top: 1rem; left: 1.2rem; }
+  .corner-mark.tr { top: 1rem; right: 1.2rem; }
+  .corner-mark.bl { bottom: 1rem; left: 1.2rem; }
+  .corner-mark.br { bottom: 1rem; right: 1.2rem; }
+
+  /* ── Stamp ── */
+  .stamp {
+    position: absolute;
+    bottom: 2.5rem;
+    right: 2rem;
+    width: 70px;
+    height: 70px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.55rem;
+    color: var(--accent);
+    transform: rotate(12deg);
+    opacity: 0.7;
+    letter-spacing: 0.08em;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; padding: 0; }
+    .poster { box-shadow: none; width: 100%; max-width: 600px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="poster">
+
+  <!-- Top Section -->
+  <div class="poster-top">
+    <div class="tape-strip top"></div>
+    <div class="poster-badge">Korea Concert Calendar</div>
+    <h1 class="poster-title">Concert Info</h1>
+    <p class="poster-sub">韩国演唱会 · 档期日历</p>
+    <div class="tape-strip bottom"></div>
+  </div>
+
+  <!-- Corner marks -->
+  <span class="corner-mark tl">✿</span>
+  <span class="corner-mark tr">✿</span>
+  <span class="corner-mark bl">✿</span>
+  <span class="corner-mark br">✿</span>
+
+  <!-- Body -->
+  <div class="poster-body">
+    <p style="text-align:center;font-size:0.78rem;color:var(--ink-50);line-height:1.8;font-weight:300;">
+      一站式查询韩国演唱会日程<br>
+      日历视图 · 场馆档期 · 实时更新
+    </p>
+
+    <div class="feature-grid">
+      <div class="feature-item">
+        <span class="feature-icon">📅</span>
+        <div class="feature-text">
+          <h4>演唱会日历</h4>
+          <p>月视图日历，一目了然查看每日演出安排</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🏟️</span>
+        <div class="feature-text">
+          <h4>场馆档期</h4>
+          <p>按场馆查看完整档期，包括非演唱会占用</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🔔</span>
+        <div class="feature-text">
+          <h4>艺人订阅</h4>
+          <p>关注喜欢的艺人，有新演出邮件即刻通知</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">📱</span>
+        <div class="feature-text">
+          <h4>随时访问</h4>
+          <p>手机电脑均可访问，随时随地查档期</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="poster-divider"><span>KEY FEATURES</span></div>
+
+    <div class="stats-row">
+      <div>
+        <div class="stat-num" id="stat-concerts">—</div>
+        <div class="stat-label">演唱会</div>
+      </div>
+      <div>
+        <div class="stat-num" id="stat-venues">—</div>
+        <div class="stat-label">场馆</div>
+      </div>
+      <div>
+        <div class="stat-num" id="stat-views">—</div>
+        <div class="stat-label">累计访问</div>
+      </div>
+    </div>
+
+    <div class="poster-divider"><span>VISIT US</span></div>
+  </div>
+
+  <!-- URL Box -->
+  <div style="padding: 0 3rem;">
+    <div class="poster-url-box">
+      <div class="poster-url">concert-kr.space</div>
+      <div class="poster-url-hint">扫码或输入网址访问 · 免费使用</div>
+    </div>
+  </div>
+
+  <!-- Bottom -->
+  <div class="poster-bottom">
+    <div class="poster-footer-text">
+      纯 AI 生成 · 不懂代码 · 但好用 ✨
+    </div>
+  </div>
+
+  <!-- Stamp -->
+  <div class="stamp">2026<br>CONCERT<br>INFO</div>
+
+</div>
+
+<!-- Load live stats -->
+<script>
+(async () => {
+  try {
+    const [concerts, venues] = await Promise.all([
+      fetch('/api/concerts').then(r => r.json()),
+      fetch('/api/venues').then(r => r.json()),
+    ]);
+    document.getElementById('stat-concerts').textContent = concerts.length;
+    document.getElementById('stat-venues').textContent = venues.length;
+  } catch {
+    document.getElementById('stat-concerts').textContent = '∞';
+    document.getElementById('stat-venues').textContent = '∞';
+  }
+})();
+</script>
+
+</body>
+</html>

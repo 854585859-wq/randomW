@@ -1,3 +1,8 @@
 node_modules
 .env
 .DS_Store
+data/*.log
+dist/concert-calendar/
+dist/poster/
+dist/xhs-cover/
+dist/thumbnail-tool/
