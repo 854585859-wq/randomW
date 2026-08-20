@@ -2,7 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { readData, writeData } from '../utils/data.js';
 import { requireAdmin, setAdminCookie, clearAdminCookie, verify, COOKIE_NAME } from '../middleware/auth.js';
-import { sendSubscriptionEmail } from '../utils/mail.js';
+import { sendSubscriptionEmail, sendSubscriptionBatch } from '../utils/mail.js';
 import { supabase } from '../lib/supabase.js';
 import { execSync } from 'child_process';
 import fs from 'fs';
@@ -65,20 +65,28 @@ adminRouter.post('/concerts', requireAdmin, async (req, res) => {
         );
         console.log(`Found ${matching.length} subscribers for ${artist}`);
         const dateStr = endDate ? `${date} → ${endDate}` : date;
-        for (const s of matching) {
-          try {
-            await sendSubscriptionEmail({
-              to: s.email, artist, dateStr, venueName, description: description || '',
-            });
-            // Log to sent_emails
-            await supabase.from('sent_emails').insert({
-              email: s.email, artist: s.artist, concert_artist: artist,
-              concert_date: dateStr, venue_name: venueName, type: 'subscription',
-            });
-          } catch (mailErr) {
-            console.error('Send email failed:', mailErr.message);
-            // Log failure
-            try { await supabase.from('sent_emails').insert({ email: s.email, artist: s.artist, concert_artist: artist, concert_date: dateStr, venue_name: venueName, type: 'subscription_failed' }); } catch {}
+
+        // 每 20 个收件人打包成一封 BCC 批量发送，避免 QQ 邮箱限流
+        const BATCH_SIZE = 20;
+        for (let i = 0; i < matching.length; i += BATCH_SIZE) {
+          const batch = matching.slice(i, i + BATCH_SIZE);
+          const recipients = batch.map(s => s.email);
+          const result = await sendSubscriptionBatch({
+            recipients, artist, dateStr, venueName, description: description || '',
+          });
+          // 记录每个收件人的状态
+          for (const s of batch) {
+            try {
+              await supabase.from('sent_emails').insert({
+                email: s.email, artist: s.artist, concert_artist: artist,
+                concert_date: dateStr, venue_name: venueName,
+                type: result.success ? 'subscription' : 'subscription_failed',
+              });
+            } catch {}
+          }
+          // 批次之间间隔 2 秒，进一步降低限流风险
+          if (i + BATCH_SIZE < matching.length) {
+            await new Promise(r => setTimeout(r, 2000));
           }
         }
         if (matching.length > 0) {

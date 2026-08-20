@@ -91,3 +91,45 @@ export async function sendSubscriptionEmail({ to, artist, dateStr, venueName, de
     throw err;
   }
 }
+
+// 批量发送：把多个收件人打包成一封 BCC 密送，减少 SMTP 请求次数，避免触发 QQ 邮箱限流
+export async function sendSubscriptionBatch({ recipients, artist, dateStr, venueName, description }) {
+  const t = getTransporter();
+  const body = `您关注的 ${artist} 有新演出！
+
+日期：${dateStr}
+场馆：${venueName}
+描述：${description || '暂无'}
+
+查看详情：https://concert-kr.space
+
+——
+本次推送为一次性通知。如需继续接收 ${artist} 或其他艺人的最新演出信息，请前往 https://concert-kr.space 重新订阅。`;
+
+  if (!recipients || recipients.length === 0) {
+    return { success: true, sent: 0 };
+  }
+
+  if (!t) {
+    console.log('--- Subscription email would be sent (batch) ---');
+    console.log('To (BCC):', recipients.join(', '));
+    console.log(body);
+    console.log('--- End ---');
+    return { success: true, sent: recipients.length };
+  }
+
+  try {
+    await t.sendMail({
+      from: process.env.SMTP_USER,
+      to: process.env.SMTP_USER, // 发给自己，实际收件人放 BCC
+      bcc: recipients,
+      subject: `[Concert Info] ${artist} 新演出通知`,
+      text: body,
+    });
+    console.log(`Subscription email batch sent to ${recipients.length} recipients`);
+    return { success: true, sent: recipients.length };
+  } catch (err) {
+    console.error('Failed to send subscription batch:', err.message);
+    return { success: false, sent: 0, error: err.message };
+  }
+}
