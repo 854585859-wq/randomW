@@ -378,6 +378,16 @@ adminRouter.get('/subscriptions', requireAdmin, async (_req, res) => {
   }
 });
 
+// --- Sent Emails (admin) ---
+adminRouter.get('/sent-emails', requireAdmin, async (_req, res) => {
+  try {
+    const { data } = await supabase.from('sent_emails').select('*').order('sent_at', { ascending: false }).limit(500);
+    res.json(data || []);
+  } catch (err) {
+    res.status(500).json({ error: '读取失败' });
+  }
+});
+
 adminRouter.post('/subscriptions/:id/push', requireAdmin, async (req, res) => {
   try {
     const { data: subs } = await supabase.from('subscriptions').select('*').eq('id', req.params.id);

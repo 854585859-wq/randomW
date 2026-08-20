@@ -28,6 +28,7 @@
       <div class="tab" data-tab="venues">场馆</div>
       <div class="tab" data-tab="stats">统计</div>
       <div class="tab" data-tab="subscriptions">订阅</div>
+      <div class="tab" data-tab="emails">邮件</div>
       <div class="tab" data-tab="feedback">反馈</div>
     </div>
     <div id="quickAdd" style="margin-bottom:1rem;display:none;">
@@ -511,6 +512,40 @@
     }
 
     // ============================================================
+    //  EMAILS
+    // ============================================================
+    async function renderEmails() {
+      let html = '<div class="card"><h3 style="font-weight:500;margin-bottom:0.8rem;font-size:0.9rem;">邮件发送记录</h3>';
+      try {
+        const emails = await api('/api/admin/sent-emails');
+        if (emails.length === 0) {
+          html += '<div class="empty"><p>暂无发送记录</p><p style="font-size:0.7rem;color:var(--ink-25);margin-top:0.4rem;">以后每次发送订阅邮件都会记录在这里</p></div>';
+        } else {
+          const failed = emails.filter(e => e.type === 'subscription_failed').length;
+          const success = emails.length - failed;
+          html += `<p style="font-size:0.7rem;color:var(--ink-50);margin-bottom:0.8rem;">
+            共 ${emails.length} 条 · 成功 <strong style="color:#5a6b4a;">${success}</strong> · 失败 <strong style="color:#c97d7d;">${failed}</strong>
+          </p>`;
+          html += `<table><thead><tr><th>时间</th><th>订阅邮箱</th><th>订阅艺人</th><th>演出艺人</th><th>演出日期</th><th>状态</th></tr></thead><tbody>
+            ${emails.map(e => {
+              const isFailed = e.type === 'subscription_failed';
+              return `<tr>
+                <td style="font-size:0.7rem;white-space:nowrap;">${e.sent_at ? new Date(e.sent_at).toLocaleString('zh-CN') : '-'}</td>
+                <td style="font-size:0.72rem;">${escHtml(e.email)}</td>
+                <td>${escHtml(e.artist)}</td>
+                <td><strong>${escHtml(e.concert_artist || '-')}</strong></td>
+                <td style="font-size:0.72rem;white-space:nowrap;">${escHtml(e.concert_date || '-')}</td>
+                <td style="white-space:nowrap;">${isFailed ? '<span style="color:#c97d7d;font-weight:500;">❌ 失败</span>' : '<span style="color:#5a6b4a;font-weight:500;">✅ 成功</span>'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody></table>`;
+        }
+      } catch(e) { html += '<div class="empty"><p>加载失败</p></div>'; }
+      html += '</div>';
+      return html;
+    }
+
+    // ============================================================
     //  FEEDBACK
     // ============================================================
     async function renderFeedback() {
@@ -554,6 +589,7 @@
       else if (tab === 'venues') content.innerHTML = renderVenues();
       else if (tab === 'stats') content.innerHTML = await renderStats();
       else if (tab === 'subscriptions') content.innerHTML = await renderSubscriptions();
+      else if (tab === 'emails') content.innerHTML = await renderEmails();
       else if (tab === 'feedback') content.innerHTML = await renderFeedback();
     }
 
