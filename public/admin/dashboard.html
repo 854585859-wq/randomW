@@ -42,6 +42,16 @@
 
   <script src="/js/utils.js"></script>
   <script>
+    // 本地日期字符串（按浏览器本地时区，即北京时间）
+    function localDateStr() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function localMonthStr() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    }
+
     function toggleNotrack() {
       if (localStorage.getItem('notrack')) { localStorage.removeItem('notrack'); alert('已恢复追踪'); }
       else { localStorage.setItem('notrack','1'); alert('已排除自己的访问'); }
@@ -111,7 +121,7 @@
         const day2 = shortMatch[3] ? shortMatch[3].padStart(2,'0') : '';
         start = `${year}-${month}-${day1}`;
         // If date is in the past, assume next year
-        if (start < new Date().toISOString().split('T')[0]) start = `${year + 1}-${month}-${day1}`;
+        if (start < localDateStr()) start = `${year + 1}-${month}-${day1}`;
         if (day2) end = `${start.slice(0,7)}-${day2}`;
         return { start, end };
       }
@@ -191,7 +201,7 @@
         html += '</div>';
 
         // Filtered concerts
-        const today = new Date().toISOString().split('T')[0];
+        const today = localDateStr();
         let filtered = concertVenueFilter ? allConcerts.filter(c => c.venue_id === concertVenueFilter) : allConcerts;
         if (!showExpired) filtered = filtered.filter(c => (c.end_date || c.date) >= today);
         const totalCount = allConcerts.length;
@@ -393,7 +403,7 @@
                 <tbody>
                   ${daily.map(d => {
                     const barWidth = Math.round(d.count / maxDaily * 100);
-                    const isToday = d.date === new Date().toISOString().split('T')[0];
+                    const isToday = d.date === localDateStr();
                     return `<tr style="${isToday ? 'font-weight:bold;' : ''}">
                       <td style="white-space:nowrap;">${d.date}${isToday ? ' ⬅️' : ''}</td>
                       <td style="text-align:right;">${d.count}</td>
@@ -420,7 +430,7 @@
                 <tbody>
                   ${monthly.map(d => {
                     const barWidth = Math.round(d.count / maxMonthly * 100);
-                    const isCurrentMonth = d.month === new Date().toISOString().slice(0, 7);
+                    const isCurrentMonth = d.month === localMonthStr();
                     return `<tr style="${isCurrentMonth ? 'font-weight:bold;' : ''}">
                       <td style="white-space:nowrap;">${d.month}${isCurrentMonth ? ' ⬅️' : ''}</td>
                       <td style="text-align:right;">${d.count}</td>

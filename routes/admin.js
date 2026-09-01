@@ -13,6 +13,17 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const adminRouter = Router();
 
+// --- 时区工具：统计按北京时间 (UTC+8) ---
+const BEIJING_OFFSET_MS = 8 * 60 * 60 * 1000;
+
+function beijingDateStr(ts) {
+  return new Date(new Date(ts).getTime() + BEIJING_OFFSET_MS).toISOString().split('T')[0];
+}
+
+function beijingMonthStr(ts) {
+  return new Date(new Date(ts).getTime() + BEIJING_OFFSET_MS).toISOString().slice(0, 7);
+}
+
 // --- Auth ---
 adminRouter.post('/login', async (req, res) => {
   try {
@@ -176,7 +187,7 @@ adminRouter.get('/stats', requireAdmin, async (_req, res) => {
     // Get actual total count (not limited by Supabase default 1000)
     const { count: total } = await supabase.from('page_views').select('*', { count: 'exact', head: true });
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = beijingDateStr(new Date());
 
     // Paginate to get all records for analysis (Supabase returns max 1000 per request)
     let all = [];
@@ -190,7 +201,7 @@ adminRouter.get('/stats', requireAdmin, async (_req, res) => {
       from += BATCH;
     }
 
-    const todayViews = all.filter(v => v.created_at.startsWith(today)).length;
+    const todayViews = all.filter(v => v.created_at && beijingDateStr(v.created_at) === today).length;
 
     // Venue visit popularity
     const venueVisitMap = {};
@@ -242,18 +253,19 @@ adminRouter.get('/daily-stats', requireAdmin, async (req, res) => {
       from += BATCH;
     }
 
-    // Build date range
+    // Build date range (Beijing time)
     const result = [];
+    const beijingNow = new Date(Date.now() + BEIJING_OFFSET_MS);
     for (let i = days - 1; i >= 0; i--) {
-      const d = new Date();
+      const d = new Date(beijingNow);
       d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
-      result.push({ date: dateStr, count: 0 });
+      result.push({ date: d.toISOString().split('T')[0], count: 0 });
     }
 
-    // Count per day
+    // Count per day (Beijing time)
     all.forEach(v => {
-      const dateStr = v.created_at ? v.created_at.split('T')[0] : null;
+      if (!v.created_at) return;
+      const dateStr = beijingDateStr(v.created_at);
       const entry = result.find(r => r.date === dateStr);
       if (entry) entry.count++;
     });
@@ -281,21 +293,21 @@ adminRouter.get('/monthly-stats', requireAdmin, async (req, res) => {
       from += BATCH;
     }
 
-    // Build month range
+    // Build month range (Beijing time)
     const result = [];
-    const now = new Date();
+    const beijingNow = new Date(Date.now() + BEIJING_OFFSET_MS);
     for (let i = months - 1; i >= 0; i--) {
-      const y = now.getFullYear();
-      const m = now.getMonth() - i;
-      const d = new Date(y, m, 1);
+      const d = new Date(beijingNow);
+      d.setMonth(d.getMonth() - i);
+      d.setDate(1);
       const monthStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
       result.push({ month: monthStr, count: 0 });
     }
 
-    // Count per month
+    // Count per month (Beijing time)
     all.forEach(v => {
       if (!v.created_at) return;
-      const monthStr = v.created_at.slice(0, 7); // "2026-07"
+      const monthStr = beijingMonthStr(v.created_at);
       const entry = result.find(r => r.month === monthStr);
       if (entry) entry.count++;
     });
