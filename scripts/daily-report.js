@@ -32,7 +32,8 @@ function getTransporter() {
 
 // ── Report Logic ──────────────────────────────────────────────
 async function generateReport() {
-  const today = new Date();
+  // 按北京时间 (UTC+8) 计算，避免日报日期/统计错位
+  const today = new Date(Date.now() + 8 * 60 * 60 * 1000);
   const todayStr = today.toISOString().split('T')[0];
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);

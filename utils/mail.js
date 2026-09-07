@@ -28,7 +28,7 @@ export async function sendFeedbackEmail({ name, email, message, page }) {
 姓名：${name || '未提供'}
 邮箱：${email || '未提供'}
 来源页面：${page === 'calendar' ? '演唱会日历' : page === 'venues' ? '场馆档期' : page}
-提交时间：${new Date().toLocaleString('zh-CN')}
+提交时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}
 
 消息内容：
 ${message}
