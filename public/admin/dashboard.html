@@ -77,15 +77,22 @@
         btn.textContent = '⏳ 构建中...';
         btn.disabled = true;
         try {
-          var result = await api('/api/admin/build-minitool', { method: 'POST' });
-          alert('构建成功！\n\n' + result.count + ' 场演出 / ' + result.venues + ' 个场馆\n大小: ' + result.size + '\n\n即将开始下载。');
-          // Trigger download
+          // 直接 POST 拿 zip 二进制，浏览器自动下载
+          var resp = await fetch('/api/admin/build-minitool', { method: 'POST' });
+          if (!resp.ok) {
+            var errData = await resp.json().catch(() => ({}));
+            throw new Error(errData.error || ('HTTP ' + resp.status));
+          }
+          var blob = await resp.blob();
+          var url = URL.createObjectURL(blob);
           var a = document.createElement('a');
-          a.href = '/api/admin/download-minitool';
+          a.href = url;
           a.download = 'concert-calendar.zip';
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          alert('构建成功，已开始下载。');
         } catch(err) {
           alert('构建失败: ' + err.message);
         }

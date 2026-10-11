@@ -4,7 +4,7 @@ import { readData, writeData } from '../utils/data.js';
 import { requireAdmin, setAdminCookie, clearAdminCookie, verify, COOKIE_NAME } from '../middleware/auth.js';
 import { sendSubscriptionEmail, sendSubscriptionBatch } from '../utils/mail.js';
 import { supabase } from '../lib/supabase.js';
-import { execSync } from 'child_process';
+import JSZip from 'jszip';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -463,6 +463,7 @@ adminRouter.delete('/subscriptions/:id', requireAdmin, async (req, res) => {
 });
 
 // --- Build mini-tool zip (admin) ---
+// 直接在内存中用 jszip 打包并返回下载，避免写文件系统（Vercel 只读）+ 依赖 zip 命令
 adminRouter.post('/build-minitool', requireAdmin, async (_req, res) => {
   try {
     const { data: concerts } = await supabase.from('concerts').select('*').order('date');
@@ -476,38 +477,25 @@ adminRouter.post('/build-minitool', requireAdmin, async (_req, res) => {
       id: v.id, name: v.name, sort_order: v.sort_order,
     }));
 
-    const distDir = path.join(__dirname, '..', 'dist');
+    // 读模板文件（minitool/ 已随 git 部署）
     const templateDir = path.join(__dirname, '..', 'minitool');
-    const buildDir = path.join(distDir, 'concert-calendar');
-
-    fs.mkdirSync(buildDir, { recursive: true });
-
-    // Copy template files
-    fs.copyFileSync(path.join(templateDir, 'index.html'), path.join(buildDir, 'index.html'));
-    fs.copyFileSync(path.join(templateDir, 'app.js'), path.join(buildDir, 'app.js'));
-
-    // Write data.js with fresh data
+    const indexHtml = fs.readFileSync(path.join(templateDir, 'index.html'), 'utf8');
+    const appJs = fs.readFileSync(path.join(templateDir, 'app.js'), 'utf8');
     const dataJS = `window.__DATA__ = ${JSON.stringify({ concerts: cleanConcerts, venues: cleanVenues })};`;
-    fs.writeFileSync(path.join(buildDir, 'data.js'), dataJS);
 
-    // Zip
-    const zipPath = path.join(distDir, 'concert-calendar.zip');
-    if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
-    execSync(`cd "${buildDir}" && zip -r "${zipPath}" . -x '*.DS_Store'`, { stdio: 'pipe' });
+    // 内存打包
+    const zip = new JSZip();
+    zip.file('index.html', indexHtml);
+    zip.file('app.js', appJs);
+    zip.file('data.js', dataJS);
+    const zipBuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
 
-    const size = (fs.statSync(zipPath).size / 1024).toFixed(0);
-    res.json({ success: true, count: cleanConcerts.length, venues: cleanVenues.length, size: `${size} KB` });
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename="concert-calendar.zip"');
+    res.setHeader('Content-Length', zipBuffer.length);
+    res.send(zipBuffer);
   } catch (err) {
     console.error('Build mini-tool error:', err.message);
     res.status(500).json({ error: '构建失败: ' + err.message });
   }
-});
-
-// Download built mini-tool zip
-adminRouter.get('/download-minitool', requireAdmin, (_req, res) => {
-  const zipPath = path.join(__dirname, '..', 'dist', 'concert-calendar.zip');
-  if (!fs.existsSync(zipPath)) {
-    return res.status(404).json({ error: '请先构建小工具' });
-  }
-  res.download(zipPath, 'concert-calendar.zip');
 });
