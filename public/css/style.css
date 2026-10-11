@@ -327,3 +327,117 @@ th { font-weight: 400; color: var(--ink-50); font-size: 0.7rem; letter-spacing: 
   /* Dashboard tabs */
   .tab { padding: 0.5rem 0.7rem; font-size: 0.73rem; }
 }
+
+/* ============================================================
+   移动端单页应用（列表 / 月历 / 场馆 / 更多 + 底部 Tab）
+   ============================================================ */
+
+.hidden { display: none !important; }
+
+/* 列表 / 月历 分段切换 */
+.segment {
+  display: flex; gap: 6px;
+  background: var(--paper);
+  padding: 8px 10px;
+  border: 0.5px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 1.2rem;
+}
+.segment .seg {
+  flex: 1; text-align: center;
+  padding: 8px 0; font-size: 0.82rem; font-weight: 400;
+  color: var(--ink-25); border-radius: 6px; cursor: pointer;
+  letter-spacing: 0.04em; transition: all .2s; user-select: none;
+}
+.segment .seg.active { background: var(--ink); color: var(--paper); }
+
+/* 列表视图卡片 */
+.event-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--paper);
+  border: 0.5px solid var(--line);
+  border-left: 3px solid var(--accent);
+  padding: 14px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.event-card:active { opacity: 0.6; }
+.event-card .date {
+  flex-shrink: 0; width: 56px; text-align: center;
+  font-family: var(--serif); line-height: 1.2;
+}
+.event-card .date .md { font-size: 1.35rem; font-weight: 400; color: var(--accent-deep); }
+.event-card .date .wd { font-size: 0.58rem; color: var(--ink-25); letter-spacing: 0.06em; }
+.event-card .info { flex: 1; min-width: 0; }
+.event-card .artist {
+  font-weight: 500; font-size: 0.95rem; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.event-card .venue {
+  font-size: 0.72rem; color: var(--ink-50); margin-top: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.event-card .chev { flex-shrink: 0; color: var(--ink-25); font-size: 0.9rem; }
+
+/* 区块标签 */
+.section-label {
+  font-family: var(--serif); font-style: italic;
+  font-size: 0.85rem; color: var(--ink-50);
+  margin: 6px 0 12px;
+  position: relative; display: inline-block; padding: 0 10px;
+}
+.section-label::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--accent); opacity: 0.12; transform: rotate(-0.5deg);
+  z-index: -1;
+}
+
+/* 更多页操作项 */
+.action-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--paper); border: 0.5px solid var(--line);
+  padding: 15px 14px; margin-bottom: 10px; border-radius: 4px; cursor: pointer;
+  transition: opacity .15s;
+}
+.action-row:active { opacity: 0.6; }
+.action-row .aico {
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--ink); color: #f5d742; font-size: 1rem;
+}
+.action-row .atext { flex: 1; min-width: 0; }
+.action-row .alabel { font-size: 0.88rem; color: var(--ink); font-weight: 400; }
+.action-row .ahint { font-size: 0.7rem; color: var(--ink-25); margin-top: 2px; }
+.action-row .chev { margin-left: auto; color: var(--ink-25); }
+
+/* 底部 Tab 栏（手机端） */
+.tabbar {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--paper);
+  border-top: 0.5px solid var(--line);
+  padding: 8px 0 calc(8px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  z-index: 90;
+}
+.tabbar .tab {
+  flex: 1; text-align: center; cursor: pointer; user-select: none;
+  font-size: 0.72rem; color: var(--ink-25); letter-spacing: 0.02em;
+  border: none;
+}
+.tabbar .tab .ico { display: block; font-size: 1.2rem; margin-bottom: 2px; }
+.tabbar .tab.active { color: var(--accent-deep); }
+.tabbar .tab.active .ico { transform: scale(1.08); }
+
+/* 顶部导航（桌面端） */
+.desktop-nav { display: flex; }
+
+/* 手机端：隐藏顶部导航、显示底部 Tab、容器底部留白 */
+@media (max-width: 640px) {
+  .desktop-nav { display: none; }
+  .tabbar { display: flex; }
+  body { padding-bottom: 64px; }
+  .container { padding-bottom: calc(2.5rem + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))); }
+}
