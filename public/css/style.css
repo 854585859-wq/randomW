@@ -160,17 +160,19 @@ a { color: var(--ink); text-decoration: none; }
 }
 .calendar-header h2 { font-family: var(--serif); font-size: 1.15rem; font-weight: 400; font-style: italic; }
 .calendar-grid {
-  display: grid; grid-template-columns: repeat(7, 1fr);
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
   border: 0.5px solid var(--line); background: var(--paper);
 }
 .calendar-day-header {
   background: var(--paper); padding: 0.55rem 0.25rem; text-align: center;
   font-size: 0.68rem; font-weight: 400; color: var(--ink-25);
   border-bottom: 0.5px solid var(--line); letter-spacing: 0.03em;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
 .calendar-cell {
   background: var(--paper); min-height: 85px; padding: 0.4rem; font-size: 0.73rem;
   border-right: 0.5px solid rgba(0,0,0,0.02); border-bottom: 0.5px solid rgba(0,0,0,0.02);
+  overflow: hidden;
 }
 .calendar-cell:nth-child(7n) { border-right: none; }
 .calendar-cell.other-month { background: #f3efe8; color: var(--ink-25); }
