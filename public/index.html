@@ -367,7 +367,8 @@
       document.getElementById('segMonth').classList.toggle('active', view === 'month');
       document.getElementById('viewList').classList.toggle('hidden', view !== 'list');
       document.getElementById('viewMonth').classList.toggle('hidden', view !== 'month');
-      if (view === 'month') renderCalendar();
+      if (view === 'list') renderList();
+      else if (view === 'month') renderCalendar();
     }
     function switchTab(tab) {
       currentTab = tab;
