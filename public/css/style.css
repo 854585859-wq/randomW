@@ -12,8 +12,10 @@
   --ink-50:   #666666;
   --ink-25:   #9ca3af;
   --line:     #E5E1D6;
-  --accent:   #4A7C59;
+  --accent:   #CC3333;
   --gold:     #D4AF37;
+  --coral:    #F88379;
+  --blue:     #55AED0;
 
   --font-display: 'Anton', 'Noto Sans SC', 'PingFang SC', sans-serif;
   --font-sub:     'Plus Jakarta Sans', 'Noto Sans SC', 'PingFang SC', sans-serif;
@@ -56,7 +58,7 @@ a { color: var(--ink); text-decoration: none; }
 }
 .topbar-logo::after {
   content: ''; position: absolute; left: 0; bottom: -7px; height: 5px; width: 100%;
-  background: var(--ink);
+  background: var(--accent);
 }
 .topbar-logo::before {
   content: '★'; position: absolute; right: -18px; top: -9px;
@@ -99,13 +101,18 @@ a { color: var(--ink); text-decoration: none; }
 /* ---------- 大标题 / 标签 ---------- */
 .section-title {
   font-family: var(--font-display);
-  font-size: 1.9rem; font-weight: 700; letter-spacing: 0.01em; line-height: 1.1;
-  color: var(--ink); margin-bottom: 0.35rem;
-  position: relative; padding-left: 0.75rem;
+  font-size: 2.4rem; font-weight: 400; letter-spacing: 0.01em; line-height: 1.05;
+  color: var(--ink); margin-bottom: 0.55rem;
+  position: relative; padding-left: 0.85rem; text-transform: uppercase;
 }
 .section-title::before {
-  content: ''; position: absolute; left: 0; top: 0.1em; bottom: 0.1em;
-  width: 6px; background: var(--ink);
+  content: ''; position: absolute; left: 0; top: 0.06em; bottom: 0.06em;
+  width: 7px; background: var(--accent);
+}
+.section-title::after {
+  content: ''; display: block; height: 9px; margin-top: 0.45rem;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 120 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 7 Q 10 2 20 7 T 40 7 T 60 7 T 80 7 T 100 7 T 120 7' fill='none' stroke='%23CC3333' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: repeat-x; background-size: 120px 9px; opacity: 0.9;
 }
 .section-label {
   display: inline-block;
@@ -126,7 +133,7 @@ a { color: var(--ink); text-decoration: none; }
 .event-card {
   display: flex; align-items: stretch; gap: 0;
   background: var(--paper-2);
-  border: 2px solid var(--ink); border-radius: 10px;
+  border: 2px solid var(--blue); border-radius: 10px;
   margin-bottom: 12px; overflow: hidden; cursor: pointer;
   transition: transform .12s, box-shadow .12s;
 }
@@ -158,27 +165,59 @@ a { color: var(--ink); text-decoration: none; }
 
 /* ---------- 日历 ---------- */
 .calendar-header {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
+  display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.1rem;
+  gap: 1rem;
 }
 .calendar-header h2 {
-  font-family: var(--font-display); font-size: 1.6rem; font-weight: 400;
-  letter-spacing: 0.02em;
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 1.9rem; letter-spacing: 0.02em; color: var(--ink);
+}
+#calTitle {
+  font-size: 5rem; line-height: 0.85; letter-spacing: 0.01em;
+  color: var(--accent); text-transform: uppercase;
+}
+#calTitleSub {
+  display: block; font-family: var(--font-sub); font-weight: 700;
+  font-size: 0.72rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--ink-50); margin-bottom: 0.2rem;
+}
+.cal-nav { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
+.stamp {
+  font-family: var(--font-sub); font-weight: 700;
+  color: var(--accent); border: 2.5px solid var(--accent);
+  border-radius: 5px; padding: 0.12em 0.38em;
+  font-size: 0.8rem; letter-spacing: 0.05em; line-height: 1.2;
+  transform: rotate(-8deg); opacity: 0.85; white-space: nowrap;
 }
 .calendar-grid {
   display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
-  border: 2px solid var(--ink); border-radius: 8px; overflow: hidden;
+  border: 2px solid var(--blue); border-radius: 8px; overflow: hidden;
   background: var(--paper-2);
 }
 .calendar-day-header {
-  background: var(--ink); color: var(--paper-2);
-  padding: 0.5rem 0; text-align: center;
-  font-family: var(--font-display); font-size: 0.7rem; letter-spacing: 0.08em;
-  border-right: 1px solid rgba(255,255,255,0.14);
+  background: var(--paper-2);
+  padding: 0.45rem 0.15rem 0.5rem; text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  border-right: 1px solid var(--blue);
+  border-bottom: 1px dashed var(--blue);
 }
+.calendar-day-header .dh-en {
+  font-family: var(--font-display); font-size: 0.72rem; letter-spacing: 0.04em;
+  color: var(--ink); line-height: 1;
+}
+.calendar-day-header .dh-ko {
+  font-family: var(--font-sub); font-size: 0.56rem; font-weight: 600;
+  color: var(--ink-50); line-height: 1;
+}
+.calendar-day-header.weekend { background: rgba(248,131,121,0.16); }
+.calendar-day-header.weekend .dh-en { color: var(--accent); }
+.calendar-day-header.weekend .dh-ko { color: var(--accent); }
 .calendar-day-header:last-child { border-right: none; }
 .calendar-cell {
-  background: var(--paper-2); min-height: 82px; padding: 0.4rem;
-  font-size: 0.72rem; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  background-color: var(--paper-2); min-height: 82px; padding: 0.4rem;
+  font-size: 0.72rem; border-right: 1px solid var(--blue); border-bottom: 1px dashed var(--blue);
+  background-image: radial-gradient(rgba(42,42,42,0.05) 1px, transparent 1px);
+  background-size: 9px 9px;
   overflow: hidden;
 }
 .calendar-cell:nth-child(7n) { border-right: none; }
@@ -187,9 +226,9 @@ a { color: var(--ink); text-decoration: none; }
   font-family: var(--font-sub); font-weight: 700; font-size: 0.7rem;
   color: var(--ink-50); display: inline-block; margin-bottom: 0.25rem;
 }
-.calendar-cell.today { outline: 2px solid var(--ink); outline-offset: -2px; }
+.calendar-cell.today { outline: 2px solid var(--accent); outline-offset: -2px; }
 .calendar-cell.today .day-num {
-  background: var(--ink); color: var(--paper-2); width: 21px; height: 21px;
+  background: var(--accent); color: #fff; width: 21px; height: 21px;
   text-align: center; line-height: 21px; border-radius: 50%;
 }
 .calendar-event {
@@ -211,25 +250,25 @@ a { color: var(--ink); text-decoration: none; }
   position: relative;
   display: flex; flex-direction: column;
   background: var(--paper-2);
-  border: 4px solid var(--ink); border-radius: 0;
+  border: 4px solid var(--blue); border-radius: 0;
   padding: 24px;
   cursor: pointer;
   mix-blend-mode: multiply;
-  box-shadow: 8px 8px 0 var(--ink);
+  box-shadow: 8px 8px 0 var(--blue);
   transform: rotate(var(--rot));
   transition: transform .2s ease, box-shadow .2s ease;
 }
 .venue-card:nth-child(even) { --rot: 2deg; }
 .venue-card:hover {
   transform: rotate(var(--rot)) translateY(-6px);
-  box-shadow: 12px 12px 0 var(--ink);
+  box-shadow: 12px 12px 0 var(--blue);
 }
 .venue-card.active { border-color: var(--accent); box-shadow: 8px 8px 0 var(--accent); }
 
 .venue-card .v-photo {
   position: relative;
   aspect-ratio: 4 / 3;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--blue);
   overflow: hidden;
   margin-bottom: 24px;
   background: linear-gradient(150deg, #9a9a9a 0%, #555 45%, #7a7a7a 100%);
@@ -279,6 +318,36 @@ a { color: var(--ink); text-decoration: none; }
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- 场馆座位参考图 ---------- */
+.seat-section {
+  margin-top: 1.6rem;
+  background: var(--paper-2);
+  border: 2px solid var(--blue);
+  border-radius: 10px;
+  padding: 1.2rem 1.3rem 1.1rem;
+}
+.seat-title {
+  font-family: var(--font-display); font-weight: 400; font-size: 1.1rem;
+  letter-spacing: 0.04em; color: var(--ink);
+  margin-bottom: 0.9rem; text-transform: uppercase;
+}
+.seat-figure {
+  text-align: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.6rem;
+}
+.seat-figure img {
+  max-width: 100%; height: auto; display: block;
+  margin: 0 auto; border-radius: 4px;
+}
+.seat-figure + .seat-figure { margin-top: 0.8rem; }
+.seat-note {
+  font-family: var(--font-sub); font-size: 0.72rem; font-weight: 500;
+  color: var(--ink-50); text-align: center; margin-top: 0.75rem;
+}
+
 /* ---------- 操作项 (订阅/提供/分享) ---------- */
 .action-row {
   display: flex; align-items: center; gap: 14px;
@@ -307,8 +376,8 @@ a { color: var(--ink); text-decoration: none; }
   letter-spacing: 0.02em; touch-action: manipulation;
 }
 .btn:hover { background: var(--ink); color: var(--paper-2); }
-.btn-primary { background: var(--ink); color: #fff; }
-.btn-primary:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary { background: var(--gold); color: var(--ink); }
+.btn-primary:hover { background: var(--ink); border-color: var(--ink); color: var(--gold); }
 .btn-sm { padding: 0.3rem 0.8rem; font-size: 0.9rem; line-height: 1; }
 
 /* ---------- 表单 ---------- */
@@ -392,20 +461,24 @@ a { color: var(--ink); text-decoration: none; }
 .footer-social a:hover { color: var(--accent); }
 .footer-note { font-family: var(--font-sub); font-size: 0.7rem; color: var(--ink-25); letter-spacing: 0.02em; margin-top: 0.5rem; }
 
-/* ---------- 底部 Tab（手机端） ---------- */
+/* ---------- 底部 Tab（手机端 · 印章风） ---------- */
 .tabbar {
   display: none; position: fixed; bottom: 0; left: 0; right: 0;
   background: var(--paper-2); border-top: 3px solid var(--ink); z-index: 90;
+  box-shadow: 0 -5px 0 var(--gold);
 }
 .tabbar .tab {
   flex: 1; text-align: center; cursor: pointer; user-select: none;
-  padding: 8px 0 calc(8px + var(--safe-area-bottom));
-  font-family: var(--font-display); font-size: 0.66rem; letter-spacing: 0.06em;
-  color: var(--ink-25);
+  padding: 9px 0 calc(9px + var(--safe-area-bottom));
+  font-family: var(--font-display); font-size: 0.68rem; letter-spacing: 0.08em;
+  color: var(--ink-50);
+  border-left: 2px solid var(--line);
+  position: relative; transition: background .15s, color .15s;
 }
-.tabbar .tab .ico { display: block; font-size: 1.25rem; margin-bottom: 3px; }
-.tabbar .tab.active { color: var(--ink); }
-.tabbar .tab.active .ico { color: var(--accent); }
+.tabbar .tab:first-child { border-left: none; }
+.tabbar .tab .ico { display: block; font-size: 1.2rem; margin-bottom: 3px; }
+.tabbar .tab.active { background: var(--ink); color: var(--paper-2); }
+.tabbar .tab.active .ico { color: var(--gold); }
 
 .hidden { display: none !important; }
 .desktop-nav { display: flex; }
@@ -435,8 +508,11 @@ a { color: var(--ink); text-decoration: none; }
   .topbar-logo { font-size: 2rem; }
   .topbar-subtitle { font-size: 0.58rem; letter-spacing: 0.22em; }
   .section-title { font-size: 1.6rem; }
+  #calTitle { font-size: 2.6rem; }
   .calendar-cell { min-height: 60px; padding: 0.26rem; }
-  .calendar-day-header { font-size: 0.6rem; padding: 0.4rem 0; }
+  .calendar-day-header { padding: 0.35rem 0 0.4rem; }
+  .calendar-day-header .dh-en { font-size: 0.62rem; }
+  .calendar-day-header .dh-ko { font-size: 0.48rem; }
   .calendar-event { font-size: 0.54rem; }
   .event-card .date { width: 62px; }
   .event-card .date .md { font-size: 1.45rem; }
@@ -448,6 +524,8 @@ a { color: var(--ink); text-decoration: none; }
   .venue-card .v-meta { padding-top: 12px; gap: 6px; }
   .venue-card .v-meta .row { font-size: 0.68rem; gap: 6px; }
   .venue-card .v-meta .k { letter-spacing: 0.04em; }
+  .seat-section { padding: 0.9rem; }
+  .seat-figure { padding: 0.3rem; }
   .modal { max-width: 100%; margin: 0 0.5rem; }
   .btn { min-height: 38px; }
 }

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=15">
+  <link rel="stylesheet" href="/css/style.css?v=23">
 </head>
 <body>
 
@@ -34,8 +34,12 @@
       <div class="calendar-layout">
         <div class="cal-left">
           <div class="calendar-header">
-            <h2 id="calTitle"></h2>
-            <div>
+            <div class="cal-title">
+              <span id="calTitleSub"></span>
+              <h2 id="calTitle"></h2>
+            </div>
+            <div class="cal-nav">
+              <span class="stamp">票</span>
               <button class="btn btn-sm" id="btnPrev">‹</button>
               <button class="btn btn-sm" id="btnNext">›</button>
             </div>
@@ -105,6 +109,11 @@
   <script src="/js/utils.js"></script>
   <script>
     const DAYS = ['日', '一', '二', '三', '四', '五', '六'];
+    const HEADER_EN = ['M', 'T', 'W', 'T', 'F', 'SAT', 'SUN'];
+    const HEADER_KO = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
+    const dayHeaders = () => HEADER_EN.map((en, i) =>
+      `<div class="calendar-day-header${i >= 5 ? ' weekend' : ''}"><span class="dh-en">${en}</span><span class="dh-ko">${HEADER_KO[i]}</span></div>`
+    ).join('');
     let allConcerts = [], allVenues = [];
     let currentYear, currentMonth;
     let venueYear, venueMonth;
@@ -167,10 +176,13 @@
 
     // ── 月历视图 ──
     function renderCalendar() {
-      document.getElementById('calTitle').textContent = currentYear + '. ' + String(currentMonth + 1).padStart(2, '0');
+      const MONTH_ABBR = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+      const MONTH_FULL = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+      document.getElementById('calTitle').textContent = MONTH_ABBR[currentMonth];
+      document.getElementById('calTitleSub').textContent = MONTH_FULL[currentMonth] + ' ' + currentYear;
       const grid = document.getElementById('calGrid');
-      let html = DAYS.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
-      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      let html = dayHeaders();
+      const firstDay = (new Date(currentYear, currentMonth, 1).getDay() + 6) % 7;
       const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
       const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
 
@@ -222,23 +234,23 @@
     }
 
     // ── 场馆视图 ──
-    // 15 个场馆的真实信息：区域 / 座位数 / 图片（Wikimedia Commons 免费授权）
+    // 15 个场馆的真实信息：区域 / 座位数 / 图片（本地存储）
     const VENUE_META = {
-      5:  { region: 'SEOUL REGION', capacity: '15,000', img: '/img/venues/kspo.jpg' },   // KSPO DOME
-      2:  { region: 'INCHEON REGION', capacity: '15,000', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Inspire_Arena.jpg/960px-Inspire_Arena.jpg' },                                             // NAVER Arena
-      3:  { region: 'SEOUL REGION', capacity: '17,000–25,000', img: 'https://upload.wikimedia.org/wikipedia/commons/d/dd/Gocheok_Sky_Dome_interior.jpg' },                                                              // 高尺天空巨蛋
-      4:  { region: 'SEOUL REGION', capacity: '11,069', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Jamsil_Arena_for_2019_LCK_Spring_Finals_%282%29.jpg/960px-Jamsil_Arena_for_2019_LCK_Spring_Finals_%282%29.jpg' },  // 蚕室室内体育馆
-      6:  { region: 'SEOUL REGION', capacity: '2,452', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Seoul_Olympic_Hall.jpg/960px-Seoul_Olympic_Hall.jpg' },                                   // 奥林匹克大厅
-      17: { region: 'SEOUL REGION', capacity: '5,003', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/A_band_plays_on_stage_while_a_singer_engages_the_audience_in_a_bustling_downtown_venue_filled_with_colorful_lights.jpg/960px-A_band_plays_on_stage_while_a_singer_engages_the_audience_in_a_bustling_downtown_venue_filled_with_colorful_lights.jpg' },  // TICKET LINK LIVE ARENA
-      11: { region: 'SEOUL REGION', capacity: '8,057', img: '/img/venues/hwajeong.jpg' },         // 高丽大化汀
-      7:  { region: 'SEOUL REGION', capacity: '4,507', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Jangchung_gymnasium.JPG/960px-Jangchung_gymnasium.JPG' },                                // 奖忠体育馆
-      1:  { region: 'SEOUL REGION', capacity: '1,010', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Theater_Bielefeld_Zuschauerraum.jpg/960px-Theater_Bielefeld_Zuschauerraum.jpg' },        // Ticketlink 1975 剧场
-      9:  { region: 'GYEONGGI REGION', capacity: '6,000–10,000', img: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/%ED%82%A8%ED%85%8D%EC%8A%A4.jpg' },                                                    // KINTEX HALL
-      14: { region: 'SEOUL REGION', capacity: '2,222', img: '/img/venues/kbs.jpg', pos: '50% 100%' },                                           // KBS Arena
-      16: { region: 'SEOUL REGION', capacity: '2,000', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Musicians_play_passionately_on_stage_with_colorful_lights_illuminating_the_venue.jpg/960px-Musicians_play_passionately_on_stage_with_colorful_lights_illuminating_the_venue.jpg' },  // 明华 Myunghwa
-      12: { region: 'GYEONGGI REGION', capacity: '41,311', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Rock_band_performs_live_on_stage_with_vibrant_lights_and_energetic_atmosphere_during_a_music_festival_in_an_outdoor_venue.jpg/960px-Rock_band_performs_live_on_stage_with_vibrant_lights_and_energetic_atmosphere_during_a_music_festival_in_an_outdoor_venue.jpg' },  // 高阳体育场
-      15: { region: 'SEOUL REGION', capacity: '2,500', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Victoria_Concert_Hall_Interior.jpg/960px-Victoria_Concert_Hall_Interior.jpg' },           // YES24 LIVE HALL
-      13: { region: 'INCHEON REGION', capacity: '29,376', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Incheon_Asiad_Main_Stadium.jpg/960px-Incheon_Asiad_Main_Stadium.jpg' }                 // 仁川亚运主体育场
+      5:  { region: 'SEOUL REGION', capacity: '15,000', img: '/img/venues/kspo.jpg', seat: '/img/seats/kspo.jpg' },            // KSPO DOME
+      2:  { region: 'INCHEON REGION', capacity: '15,000', img: '/img/venues/inspire.jpg', seat: '/img/seats/inspire.webp', seat2: '/img/seats/inspire-3d.jpg' },        // INSPIRE Arena
+      3:  { region: 'SEOUL REGION', capacity: '17,000–25,000', img: '/img/venues/gocheok.jpg' },   // 高尺天空巨蛋
+      4:  { region: 'SEOUL REGION', capacity: '11,069', img: '/img/venues/jamsil.jpg' },           // 蚕室室内体育馆
+      6:  { region: 'SEOUL REGION', capacity: '2,432–3,584', img: '/img/venues/olympic-hall.jpg', seat: '/img/seats/olympic-hall.jpg' }, // 奥林匹克大厅
+      17: { region: 'SEOUL REGION', capacity: '5,003', img: '/img/venues/ticketlink-live.jpg', seat: '/img/seats/ticketlink.jpg' },   // TICKET LINK LIVE ARENA
+      11: { region: 'SEOUL REGION', capacity: '8,057', img: '/img/venues/hwajeong.jpg' },          // 高丽大化汀
+      7:  { region: 'SEOUL REGION', capacity: '4,507', img: '/img/venues/jangchung.jpg' },         // 奖忠体育馆
+      1:  { region: 'SEOUL REGION', capacity: '1,010', img: '/img/venues/ticketlink1975.jpg' },    // Ticketlink 1975 剧场
+      9:  { region: 'GYEONGGI REGION', capacity: '6,000–10,000', img: '/img/venues/kintex.jpg' },  // KINTEX HALL
+      14: { region: 'SEOUL REGION', capacity: '2,222', img: '/img/venues/kbs.jpg', pos: '50% 100%' }, // KBS Arena
+      16: { region: 'SEOUL REGION', capacity: '2,000', img: '/img/venues/myunghwa.jpg' },          // 明华 Myunghwa
+      12: { region: 'GYEONGGI REGION', capacity: '41,311', img: '/img/venues/goyang.jpg' },        // 高阳体育场
+      15: { region: 'SEOUL REGION', capacity: '2,500', img: '/img/venues/yes24.jpg' },             // YES24 LIVE HALL
+      13: { region: 'INCHEON REGION', capacity: '29,376', img: '/img/venues/incheon.jpg' }         // 仁川亚运主体育场
     };
     function venueRegion(name) {
       name = name || '';
@@ -301,8 +313,8 @@
         <div><button class="btn btn-sm" onclick="venueMonthShift(-1)">‹</button><button class="btn btn-sm" onclick="venueMonthShift(1)">›</button></div>
       </div>`;
       html += '<div class="calendar-grid">';
-      html += DAYS.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
-      const firstDay = new Date(venueYear, venueMonth, 1).getDay();
+      html += dayHeaders();
+      const firstDay = (new Date(venueYear, venueMonth, 1).getDay() + 6) % 7;
       const daysInMonth = new Date(venueYear, venueMonth + 1, 0).getDate();
       const daysInPrevMonth = new Date(venueYear, venueMonth, 0).getDate();
       for (let i = firstDay - 1; i >= 0; i--) {
@@ -326,6 +338,15 @@
         html += `<div class="calendar-cell other-month"><div class="day-num">${d}</div>${venueEvents(key, vcArr)}</div>`;
       }
       html += '</div>';
+      const vm = VENUE_META[venue.id] || {};
+      const seatImgs = [vm.seat, vm.seat2].filter(Boolean);
+      if (seatImgs.length) {
+        html += `<div class="seat-section">
+          <h3 class="seat-title">座位参考图</h3>
+          ${seatImgs.map((s, i) => `<div class="seat-figure"><img src="${s}" alt="${escHtml(venue.name)} 座位图 ${i + 1}" loading="lazy"></div>`).join('')}
+          <p class="seat-note">仅供参考，实际请以官方票务页面为准</p>
+        </div>`;
+      }
       area.innerHTML = html;
     }
     function venueEvents(dateKey, concerts) {
@@ -409,7 +430,7 @@
       document.querySelectorAll('.tabbar .tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
 
       if (tab === 'calendar') { renderCalendar(); renderList(); }
-      if (tab === 'venues') { showVenueCalendar(); }
+      if (tab === 'venues') { showVenueList(); }
     }
     function calMode(mode) {
       document.getElementById('viewCalendar').classList.toggle('mode-list', mode === 'list');
