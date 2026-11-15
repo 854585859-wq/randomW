@@ -1,0 +1,79 @@
+/* ============================================================
+   管理后台专用样式 · 与主站「票根/印章」风格一致
+   （主站 style.css 重写后不再包含后台类，这里补齐，互不干扰）
+   ============================================================ */
+
+:root {
+  --serif: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
+  --ink-30: #8a8a8a;
+}
+
+/* ---------- 登录页 ---------- */
+body.login-page {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; padding: 1.2rem;
+}
+.login-card {
+  width: 100%; max-width: 400px;
+  background: var(--paper-2);
+  border: 3px solid var(--ink); border-radius: 10px;
+  padding: 2.4rem 2rem 2rem;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.login-card h1 {
+  font-family: var(--font-display);
+  font-size: 2.3rem; font-weight: 400; letter-spacing: 0.02em; line-height: 1;
+  text-align: center; color: var(--ink); text-transform: uppercase;
+}
+
+/* ---------- 页内 Tab 栏 ---------- */
+.tabs {
+  display: flex; gap: 0.5rem; flex-wrap: wrap;
+}
+.tabs .tab {
+  padding: 0.5rem 1.15rem; cursor: pointer; user-select: none;
+  font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 0.06em;
+  color: var(--ink-50); background: transparent;
+  border: 2px solid var(--ink); border-radius: 6px;
+  transition: all .15s;
+}
+.tabs .tab:hover { color: var(--ink); }
+.tabs .tab.active { background: var(--ink); color: var(--paper-2); border-color: var(--ink); }
+
+/* ---------- 卡片 ---------- */
+.card {
+  background: var(--paper-2);
+  border: 2px solid var(--ink); border-radius: 10px;
+  padding: 1.25rem 1.3rem;
+  margin-bottom: 1rem;
+}
+.card h3 {
+  font-family: var(--font-display); font-weight: 400; letter-spacing: 0.02em;
+  color: var(--ink); font-size: 0.95rem;
+}
+
+/* ---------- 表格 ---------- */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+table th, table td {
+  text-align: left; padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.82rem; vertical-align: middle;
+}
+table th {
+  font-family: var(--font-sub); font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-50);
+  border-bottom: 2px solid var(--ink); white-space: nowrap;
+}
+table tr:hover td { background: rgba(42,42,42,0.035); }
+
+/* ---------- 危险按钮 ---------- */
+.btn-danger { border-color: #c05656; color: #c05656; }
+.btn-danger:hover { background: #c05656; border-color: #c05656; color: #fff; }
+
+/* ---------- 提示框 ---------- */
+.alert {
+  padding: 0.85rem 1rem; border: 2px solid var(--ink); border-radius: 8px;
+  margin-bottom: 1rem; font-size: 0.84rem;
+}
+.alert-info { background: var(--paper-2); color: var(--ink); }
