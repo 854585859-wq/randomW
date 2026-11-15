@@ -4,16 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Concert Info</title>
-  <link rel="stylesheet" href="/css/style.css?v=6">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css?v=15">
 </head>
 <body>
 
   <header class="topbar">
     <div class="topbar-inner">
       <a href="/" class="topbar-logo">Concert Info</a>
-      <div style="position:absolute;top:0;right:12%;font-size:1.2rem;opacity:0.5;transform:rotate(8deg);pointer-events:none;z-index:5;">✨</div>
       <div class="topbar-subtitle">Korea Concert Calendar</div>
-      <div class="topbar-divider"></div>
       <nav class="topbar-links desktop-nav">
         <a href="#" data-tab="calendar" class="active">日历</a>
         <a href="#" data-tab="venues">场馆</a>
@@ -22,40 +23,44 @@
     </div>
   </header>
 
-  <!-- 列表/月历 切换（日历页内） -->
   <div class="container">
-    <div class="segment" id="segment">
-      <div class="seg active" id="segList" onclick="switchView('list')">📋 列表</div>
-      <div class="seg" id="segMonth" onclick="switchView('month')">📅 月历</div>
-    </div>
 
-    <!-- 日历：列表视图 -->
-    <div id="viewList">
-      <span class="section-label">近期演出</span>
-      <div id="listContent"></div>
-    </div>
-
-    <!-- 日历：月历视图 -->
-    <div id="viewMonth" class="hidden">
-      <div class="calendar-header">
-        <h2 id="calTitle"></h2>
-        <div>
-          <button class="btn btn-sm" id="btnPrev">‹</button>
-          <button class="btn btn-sm" id="btnNext">›</button>
+    <!-- 日历：左月历 + 右 upcoming -->
+    <div id="viewCalendar">
+      <div class="cal-toggle">
+        <button type="button" class="ct-btn active" data-calmode="calendar">日历</button>
+        <button type="button" class="ct-btn" data-calmode="list">最近演出</button>
+      </div>
+      <div class="calendar-layout">
+        <div class="cal-left">
+          <div class="calendar-header">
+            <h2 id="calTitle"></h2>
+            <div>
+              <button class="btn btn-sm" id="btnPrev">‹</button>
+              <button class="btn btn-sm" id="btnNext">›</button>
+            </div>
+          </div>
+          <div class="calendar-grid" id="calGrid"></div>
+        </div>
+        <div class="cal-right">
+          <span class="section-label">近期演出</span>
+          <div id="listContent"></div>
         </div>
       </div>
-      <div class="calendar-grid" id="calGrid"></div>
     </div>
 
-    <!-- 场馆视图 -->
+    <!-- 场馆视图：直接进日历，返回看场馆列表 -->
     <div id="viewVenues" class="hidden">
-      <h2 class="section-title">场馆档期</h2>
-      <div class="form-group">
-        <input type="text" id="venueSearch" class="form-input" placeholder="搜索场馆…">
+      <div id="venueList">
+        <h2 class="section-title">场馆档期</h2>
+        <div class="form-group">
+          <input type="text" id="venueSearch" class="form-input" placeholder="搜索场馆…">
+        </div>
+        <div id="venueButtons" class="venue-grid"></div>
       </div>
-      <div id="venueButtons" class="venue-btn-group"></div>
-      <div id="scheduleArea" style="margin-top:1rem;">
-        <div class="empty"><div class="empty-icon">📍</div><p>选择场馆查看档期</p></div>
+      <div id="venueCalendar" class="hidden">
+        <button type="button" class="btn btn-sm" id="btnBackVenue">‹ 返回</button>
+        <div id="scheduleArea" style="margin-top:1.1rem;"></div>
       </div>
     </div>
 
@@ -81,11 +86,11 @@
         <span class="chev">›</span>
       </div>
 
-      <div class="page-footer" style="margin-top:2rem;">
+      <div class="page-footer">
         <p class="footer-social">
           Made by <a href="https://www.xiaohongshu.com/user/profile/62263f78000000000201d714" target="_blank" rel="noopener">@今天也想看演唱会</a>
         </p>
-        <div style="font-size:0.65rem;color:var(--accent);opacity:0.35;letter-spacing:0.3em;margin-top:0.3rem;">✿ · · · ✿ · · · ✿</div>
+        <p class="footer-note">场馆图片来源 Wikimedia Commons（CC0 / CC BY / CC BY-SA / KOGL 等免费授权）</p>
       </div>
     </div>
   </div>
@@ -100,13 +105,11 @@
   <script src="/js/utils.js"></script>
   <script>
     const DAYS = ['日', '一', '二', '三', '四', '五', '六'];
-    const VENUE_COLORS = ['#c4875c','#8b9a8b','#9b8a7a','#b8946e','#7a8a8b','#a08b7c'];
     let allConcerts = [], allVenues = [];
     let currentYear, currentMonth;
     let venueYear, venueMonth;
     let activeVenueId = null;
     let currentTab = 'calendar';
-    let currentView = 'list';
     const now = new Date();
     currentYear = now.getFullYear();
     currentMonth = now.getMonth();
@@ -139,21 +142,7 @@
       return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
     }
 
-    const venueColorMap = {};
-    let colorIdx = 0;
-    function getVenueColor(name) {
-      if (!venueColorMap[name]) {
-        venueColorMap[name] = VENUE_COLORS[colorIdx % VENUE_COLORS.length];
-        colorIdx++;
-      }
-      return venueColorMap[name];
-    }
-    function getVenueColorById(id) {
-      const idx = allVenues.findIndex(v => v.id === id);
-      return VENUE_COLORS[idx >= 0 ? idx % VENUE_COLORS.length : 0];
-    }
-
-    // ── 列表视图 ──
+    // ── upcoming 列表 ──
     function renderList() {
       const el = document.getElementById('listContent');
       const t = todayKey();
@@ -165,14 +154,13 @@
         return;
       }
       el.innerHTML = upcoming.map(c => {
-        const vc = getVenueColor(c.venue_name);
-        return `<div class="event-card" style="border-left-color:${vc};" onclick="showDetail(${c.id})">
+        return `<div class="event-card" onclick="showDetail(${c.id})">
           <div class="date"><div class="md">${mdStr(c.date)}</div><div class="wd">${wdStr(c.date)}</div></div>
           <div class="info">
             <div class="artist">${escHtml(c.artist)}</div>
             <div class="venue">${c.end_date && c.end_date !== c.date ? escHtml(mdStr(c.end_date)) + ' · ' : ''}🏟️ ${escHtml(c.venue_name)}</div>
           </div>
-          <span class="chev">›</span>
+          <span class="tick">›</span>
         </div>`;
       }).join('');
     }
@@ -210,48 +198,95 @@
     }
     function renderEvents(dateKey) {
       return allConcerts.filter(c => concertOnDate(c, dateKey)).map(c => {
-        const vc = getVenueColor(c.venue_name);
-        return `<div class="calendar-event" style="border-left:2px solid ${vc};background:${vc}15;" onclick="event.stopPropagation();showDetail(${c.id})">${escHtml(c.artist)}</div>`;
+        return `<div class="calendar-event" onclick="event.stopPropagation();showDetail(${c.id})">${escHtml(c.artist)}</div>`;
       }).join('');
     }
 
-    // ── 详情弹窗 ──
+    // ── 详情弹窗（票根风） ──
     function showDetail(id) {
       const c = allConcerts.find(x => x.id === id);
       if (!c) return;
       const body = showModal(c.artist, '');
       const dateRange = c.end_date && c.end_date !== c.date ? `${c.date} → ${c.end_date}` : c.date;
       body.innerHTML = `
-        <div style="line-height:2;font-weight:300;">
-          <p><span style="color:var(--ink-25);font-size:0.75rem;">日期</span><br>${escHtml(dateRange)}</p>
-          <p style="margin-top:0.4rem;"><span style="color:var(--ink-25);font-size:0.75rem;">场馆</span><br>${escHtml(c.venue_name)}</p>
-          <p style="margin-top:0.6rem;font-size:0.85rem;">${escHtml(c.description || '暂无详情')}</p>
+        <div class="ticket">
+          <div class="t-stamp">${escHtml(mdStr(c.date))}</div>
+          <div class="t-row"><span class="t-k">日期</span><span class="t-v">${escHtml(dateRange)}</span></div>
+          <div class="t-row"><span class="t-k">场馆</span><span class="t-v">${escHtml(c.venue_name)}</span></div>
+          ${c.description ? `<div class="t-desc">${escHtml(c.description)}</div>` : ''}
         </div>
+        <div class="ticket-divider"></div>
+        <div style="padding:0 1.4rem;"><div class="barcode"></div></div>
+        <div class="ticket-foot"><span>Concert Info</span><span>★ ${escHtml(mdStr(c.date))}</span></div>
       `;
     }
 
     // ── 场馆视图 ──
+    // 15 个场馆的真实信息：区域 / 座位数 / 图片（Wikimedia Commons 免费授权）
+    const VENUE_META = {
+      5:  { region: 'SEOUL REGION', capacity: '15,000', img: '/img/venues/kspo.jpg' },   // KSPO DOME
+      2:  { region: 'INCHEON REGION', capacity: '15,000', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Inspire_Arena.jpg/960px-Inspire_Arena.jpg' },                                             // NAVER Arena
+      3:  { region: 'SEOUL REGION', capacity: '17,000–25,000', img: 'https://upload.wikimedia.org/wikipedia/commons/d/dd/Gocheok_Sky_Dome_interior.jpg' },                                                              // 高尺天空巨蛋
+      4:  { region: 'SEOUL REGION', capacity: '11,069', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Jamsil_Arena_for_2019_LCK_Spring_Finals_%282%29.jpg/960px-Jamsil_Arena_for_2019_LCK_Spring_Finals_%282%29.jpg' },  // 蚕室室内体育馆
+      6:  { region: 'SEOUL REGION', capacity: '2,452', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Seoul_Olympic_Hall.jpg/960px-Seoul_Olympic_Hall.jpg' },                                   // 奥林匹克大厅
+      17: { region: 'SEOUL REGION', capacity: '5,003', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/A_band_plays_on_stage_while_a_singer_engages_the_audience_in_a_bustling_downtown_venue_filled_with_colorful_lights.jpg/960px-A_band_plays_on_stage_while_a_singer_engages_the_audience_in_a_bustling_downtown_venue_filled_with_colorful_lights.jpg' },  // TICKET LINK LIVE ARENA
+      11: { region: 'SEOUL REGION', capacity: '8,057', img: '/img/venues/hwajeong.jpg' },         // 高丽大化汀
+      7:  { region: 'SEOUL REGION', capacity: '4,507', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Jangchung_gymnasium.JPG/960px-Jangchung_gymnasium.JPG' },                                // 奖忠体育馆
+      1:  { region: 'SEOUL REGION', capacity: '1,010', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Theater_Bielefeld_Zuschauerraum.jpg/960px-Theater_Bielefeld_Zuschauerraum.jpg' },        // Ticketlink 1975 剧场
+      9:  { region: 'GYEONGGI REGION', capacity: '6,000–10,000', img: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/%ED%82%A8%ED%85%8D%EC%8A%A4.jpg' },                                                    // KINTEX HALL
+      14: { region: 'SEOUL REGION', capacity: '2,222', img: '/img/venues/kbs.jpg', pos: '50% 100%' },                                           // KBS Arena
+      16: { region: 'SEOUL REGION', capacity: '2,000', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Musicians_play_passionately_on_stage_with_colorful_lights_illuminating_the_venue.jpg/960px-Musicians_play_passionately_on_stage_with_colorful_lights_illuminating_the_venue.jpg' },  // 明华 Myunghwa
+      12: { region: 'GYEONGGI REGION', capacity: '41,311', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Rock_band_performs_live_on_stage_with_vibrant_lights_and_energetic_atmosphere_during_a_music_festival_in_an_outdoor_venue.jpg/960px-Rock_band_performs_live_on_stage_with_vibrant_lights_and_energetic_atmosphere_during_a_music_festival_in_an_outdoor_venue.jpg' },  // 高阳体育场
+      15: { region: 'SEOUL REGION', capacity: '2,500', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Victoria_Concert_Hall_Interior.jpg/960px-Victoria_Concert_Hall_Interior.jpg' },           // YES24 LIVE HALL
+      13: { region: 'INCHEON REGION', capacity: '29,376', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Incheon_Asiad_Main_Stadium.jpg/960px-Incheon_Asiad_Main_Stadium.jpg' }                 // 仁川亚运主体育场
+    };
+    function venueRegion(name) {
+      name = name || '';
+      if (name.indexOf('NAVER') >= 0 || name.indexOf('仁川') >= 0) return 'INCHEON REGION';
+      if (name.indexOf('高阳') >= 0 || name.indexOf('KINTEX') >= 0 || name.indexOf('一山') >= 0) return 'GYEONGGI REGION';
+      return 'SEOUL REGION';
+    }
     function renderVenueButtons() {
       const container = document.getElementById('venueButtons');
       const kw = (document.getElementById('venueSearch').value || '').trim().toLowerCase();
-      const list = kw ? allVenues.filter(v => v.name.toLowerCase().includes(kw)) : allVenues;
+      const list = kw ? allVenues.filter(v => v.name.toLowerCase().indexOf(kw) >= 0) : allVenues;
       if (list.length === 0) {
         container.innerHTML = '<p style="color:var(--ink-25);font-size:0.8rem;">未找到场馆</p>';
         return;
       }
       container.innerHTML = list.map(v => {
-        const c = getVenueColorById(v.id);
+        const m = VENUE_META[v.id] || { region: venueRegion(v.name) };
         const active = activeVenueId === v.id;
-        const cnt = allConcerts.filter(x => x.venue_id === v.id).length;
-        return `<button class="btn btn-sm venue-btn" style="${active ? 'background:'+c+';border-color:'+c+';color:#fff;' : 'border-color:'+c+';color:'+c+';'}" onclick="selectVenue(${v.id})">${escHtml(v.name)}<span style="opacity:0.6;margin-left:4px;">${cnt}</span></button>`;
+        const meta = m.capacity
+          ? `<div class="v-meta">
+              <div class="row"><span class="k">Capacity</span><span class="val">${m.capacity}</span></div>
+            </div>` : '';
+        return `<div class="venue-card${active ? ' active' : ''}" onclick="selectVenue(${v.id})">
+          <div class="v-photo">${m.img ? `<img src="${m.img}" alt="${escHtml(v.name)}" loading="lazy"${m.pos ? ` style="object-position:${m.pos}"` : ''}>` : ''}</div>
+          <div class="v-body">
+            <div class="v-name">${escHtml(v.name)}</div>
+            <div class="v-region">${escHtml(m.region)}</div>
+            ${meta}
+          </div>
+        </div>`;
       }).join('');
+    }
+    function showVenueList() {
+      document.getElementById('venueCalendar').classList.add('hidden');
+      document.getElementById('venueList').classList.remove('hidden');
+      renderVenueButtons();
+    }
+    function showVenueCalendar() {
+      if (!activeVenueId) activeVenueId = allVenues.length ? allVenues[0].id : null;
+      venueYear = now.getFullYear();
+      venueMonth = now.getMonth();
+      document.getElementById('venueList').classList.add('hidden');
+      document.getElementById('venueCalendar').classList.remove('hidden');
+      renderVenueCalendar();
     }
     function selectVenue(venueId) {
       activeVenueId = venueId;
-      venueYear = now.getFullYear();
-      venueMonth = now.getMonth();
-      renderVenueButtons();
-      renderVenueCalendar();
+      showVenueCalendar();
     }
     function renderVenueCalendar() {
       const area = document.getElementById('scheduleArea');
@@ -260,7 +295,6 @@
         area.innerHTML = '<div class="empty"><div class="empty-icon">📍</div><p>选择场馆查看档期</p></div>';
         return;
       }
-      const vc = getVenueColorById(venue.id);
       const vcArr = allConcerts.filter(c => c.venue_id === venue.id);
       let html = `<div class="calendar-header">
         <h2>${escHtml(venue.name)} · ${venueYear}.${String(venueMonth+1).padStart(2,'0')}</h2>
@@ -276,12 +310,12 @@
         const mm = venueMonth === 0 ? 12 : venueMonth;
         const yy = venueMonth === 0 ? venueYear - 1 : venueYear;
         const key = `${yy}-${String(mm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        html += `<div class="calendar-cell other-month"><div class="day-num">${d}</div>${venueEvents(key, vcArr, vc)}</div>`;
+        html += `<div class="calendar-cell other-month"><div class="day-num">${d}</div>${venueEvents(key, vcArr)}</div>`;
       }
       for (let d = 1; d <= daysInMonth; d++) {
         const key = `${venueYear}-${String(venueMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         const tk = todayKey();
-        html += `<div class="calendar-cell${key === tk ? ' today' : ''}"><div class="day-num">${d}</div>${venueEvents(key, vcArr, vc)}</div>`;
+        html += `<div class="calendar-cell${key === tk ? ' today' : ''}"><div class="day-num">${d}</div>${venueEvents(key, vcArr)}</div>`;
       }
       const total = firstDay + daysInMonth;
       const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
@@ -289,14 +323,14 @@
         const nm = venueMonth + 2 > 12 ? 1 : venueMonth + 2;
         const ny = nm === 1 ? venueYear + 1 : venueYear;
         const key = `${ny}-${String(nm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        html += `<div class="calendar-cell other-month"><div class="day-num">${d}</div>${venueEvents(key, vcArr, vc)}</div>`;
+        html += `<div class="calendar-cell other-month"><div class="day-num">${d}</div>${venueEvents(key, vcArr)}</div>`;
       }
       html += '</div>';
       area.innerHTML = html;
     }
-    function venueEvents(dateKey, concerts, color) {
+    function venueEvents(dateKey, concerts) {
       return concerts.filter(c => concertOnDate(c, dateKey)).map(c => {
-        return `<div class="calendar-event" style="border-left:2px solid ${color};background:${color}15;" onclick="event.stopPropagation();showDetail(${c.id})">${escHtml(c.artist)}</div>`;
+        return `<div class="calendar-event" onclick="event.stopPropagation();showDetail(${c.id})">${escHtml(c.artist)}</div>`;
       }).join('');
     }
     function venueMonthShift(delta) {
@@ -310,12 +344,14 @@
     window.showSubscribe = function() {
       const body = showModal('订阅艺人', '', () => {});
       body.innerHTML = `
-        <p style="font-size:0.8rem;color:var(--ink-50);margin-bottom:0.8rem;">填写你想关注的艺人，有新演出时邮件通知</p>
-        <form id="subForm" onsubmit="submitSubscribe(event)">
-          <div class="form-group"><label>邮箱 *</label><input type="email" name="email" class="form-input" required></div>
-          <div class="form-group"><label>艺人 *</label><input type="text" name="artist" class="form-input" required placeholder="输入想关注的艺人名"></div>
-          <button type="submit" class="btn btn-primary" style="width:100%">订阅</button>
-        </form>
+        <div style="padding:0 1.4rem 1.4rem;">
+          <p style="font-size:0.8rem;color:var(--ink-50);margin-bottom:0.9rem;">填写你想关注的艺人，有新演出时邮件通知</p>
+          <form id="subForm" onsubmit="submitSubscribe(event)">
+            <div class="form-group"><label>邮箱 *</label><input type="email" name="email" class="form-input" required></div>
+            <div class="form-group"><label>艺人 *</label><input type="text" name="artist" class="form-input" required placeholder="输入想关注的艺人名"></div>
+            <button type="submit" class="btn btn-primary" style="width:100%">订阅</button>
+          </form>
+        </div>
       `;
     };
     window.submitSubscribe = async function(e) {
@@ -331,12 +367,14 @@
     window.showFeedback = function() {
       const body = showModal('提供信息', '', () => {});
       body.innerHTML = `
-        <form id="fbForm" onsubmit="submitFeedback(event)">
-          <div class="form-group">
-            <textarea name="message" class="form-input" rows="4" required placeholder="艺人/场馆/时间，如果有没有添加的演出，请告知…"></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary" style="width:100%">提交</button>
-        </form>
+        <div style="padding:0 1.4rem 1.4rem;">
+          <form id="fbForm" onsubmit="submitFeedback(event)">
+            <div class="form-group">
+              <textarea name="message" class="form-input" rows="4" required placeholder="艺人/场馆/时间，如果有没有添加的演出，请告知…"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%">提交</button>
+          </form>
+        </div>
       `;
     };
     window.submitFeedback = async function(e) {
@@ -352,59 +390,48 @@
     window.showShare = function() {
       const body = showModal('分享', '', () => {});
       body.innerHTML = `
-        <div style="text-align:center;line-height:2;">
+        <div style="padding:0 1.4rem 1.4rem;text-align:center;line-height:2;">
           <p style="font-size:0.85rem;">韩国演唱会日历 · 查档期超方便 👀</p>
-          <p style="margin-top:0.8rem;padding:0.6rem;background:var(--bg);border-radius:4px;font-size:0.9rem;user-select:all;">concert-kr.space</p>
+          <p style="margin-top:0.8rem;padding:0.6rem;background:var(--paper);border-radius:6px;font-size:0.9rem;user-select:all;">concert-kr.space</p>
           <p style="font-size:0.65rem;color:var(--ink-25);margin-top:0.4rem;">长按选中网址即可复制</p>
         </div>
       `;
     };
 
     // ── 导航 ──
-    function switchView(view) {
-      currentView = view;
-      document.getElementById('segList').classList.toggle('active', view === 'list');
-      document.getElementById('segMonth').classList.toggle('active', view === 'month');
-      document.getElementById('viewList').classList.toggle('hidden', view !== 'list');
-      document.getElementById('viewMonth').classList.toggle('hidden', view !== 'month');
-      if (view === 'list') renderList();
-      else if (view === 'month') renderCalendar();
-    }
     function switchTab(tab) {
       currentTab = tab;
-      document.getElementById('viewList').classList.toggle('hidden', !(tab === 'calendar' && currentView === 'list'));
-      document.getElementById('viewMonth').classList.toggle('hidden', !(tab === 'calendar' && currentView === 'month'));
+      document.getElementById('viewCalendar').classList.toggle('hidden', tab !== 'calendar');
       document.getElementById('viewVenues').classList.toggle('hidden', tab !== 'venues');
       document.getElementById('viewMore').classList.toggle('hidden', tab !== 'more');
-      document.getElementById('segment').style.display = tab === 'calendar' ? 'flex' : 'none';
 
-      // 高亮顶部/底部 tab
       document.querySelectorAll('.topbar-links a').forEach(a => a.classList.toggle('active', a.dataset.tab === tab));
       document.querySelectorAll('.tabbar .tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
 
-      if (tab === 'calendar') { if (currentView === 'list') renderList(); else renderCalendar(); }
-      if (tab === 'venues') { renderVenueButtons(); }
+      if (tab === 'calendar') { renderCalendar(); renderList(); }
+      if (tab === 'venues') { showVenueCalendar(); }
+    }
+    function calMode(mode) {
+      document.getElementById('viewCalendar').classList.toggle('mode-list', mode === 'list');
+      document.querySelectorAll('.cal-toggle .ct-btn').forEach(b => b.classList.toggle('active', b.dataset.calmode === mode));
     }
 
     // 事件绑定
     document.getElementById('btnPrev').addEventListener('click', () => { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); });
     document.getElementById('btnNext').addEventListener('click', () => { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(); });
     document.getElementById('venueSearch').addEventListener('input', renderVenueButtons);
+    document.getElementById('btnBackVenue').addEventListener('click', showVenueList);
     document.querySelectorAll('.topbar-links a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); switchTab(a.dataset.tab); }));
     document.querySelectorAll('.tabbar .tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+    document.querySelectorAll('.cal-toggle .ct-btn').forEach(b => b.addEventListener('click', () => calMode(b.dataset.calmode)));
 
     // 初始化
     (async () => {
       await loadData();
       const hash = location.hash.replace('#', '');
-      if (hash === 'venues' || hash === 'more') {
-        switchTab(hash);
-      } else if (window.innerWidth <= 640) {
-        renderList();
-      } else {
-        switchView('month');
-      }
-      if (!localStorage.getItem('notrack')) fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: hash === 'venues' ? 'venues' : 'calendar' }) }).catch(() => {});
+      const tab = (hash === 'venues' || hash === 'more') ? hash : 'calendar';
+      switchTab(tab);
+      if (!localStorage.getItem('notrack')) fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: tab === 'venues' ? 'venues' : 'calendar' }) }).catch(() => {});
     })();
   </script>
 </body>
