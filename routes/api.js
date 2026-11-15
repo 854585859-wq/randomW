@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { readData, writeData } from '../utils/data.js';
 import { sendFeedbackEmail } from '../utils/mail.js';
+import { notify } from '../utils/notify.js';
 import { supabase } from '../lib/supabase.js';
 import { verify, COOKIE_NAME } from '../middleware/auth.js';
 
@@ -133,6 +134,14 @@ apiRouter.post('/user-feedback', async (req, res) => {
     });
     // Also send email
     sendFeedbackEmail({ name, email, message, page });
+
+    // 微信推送站长（用户反馈即时提醒，不阻塞响应）
+    const pageLabel = page === 'calendar' ? '演唱会日历' : page === 'venues' ? '场馆档期' : (page || '未知页面');
+    notify(
+      `📮 用户反馈 — ${pageLabel}`,
+      `姓名：${name || '未提供'}\n邮箱：${email || '未提供'}\n来源页面：${pageLabel}\n\n${message.trim()}`,
+    ).catch(() => {});
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: '提交失败' });

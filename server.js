@@ -32,6 +32,39 @@ initDataFiles();
 app.use('/api', apiRouter);
 app.use('/api/admin', adminRouter);
 
+// Vercel Cron：校验 Bearer CRON_SECRET（本地未配置时放行，便于手动测试）
+function isCronAuthorized(req) {
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return true;
+  return req.headers.authorization === `Bearer ${secret}`;
+}
+
+// 定时抓取高丽大化汀官方 history，自动补全演出档期
+app.get('/api/cron/scrape-kuhj', async (req, res) => {
+  if (!isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const { syncKuhj } = await import('./scripts/kuhj-scraper.mjs');
+    const result = await syncKuhj();
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error('KU scrape failed:', err.message);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// 定时日报（微信优先，邮件回退）
+app.get('/api/cron/daily-report', async (req, res) => {
+  if (!isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const { runDailyReport } = await import('./scripts/daily-report.js');
+    await runDailyReport();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Daily report failed:', err.message);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 // Exclude this device from tracking
 app.get('/notrack', (_req, res) => {
   res.cookie('notrack', '1', { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'lax' });
