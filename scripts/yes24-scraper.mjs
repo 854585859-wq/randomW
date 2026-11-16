@@ -17,6 +17,11 @@ const VENUE_NAME = 'YES24 LIVE HALL';
 const CUTOFF = '2025-01-01';
 const MAX_PAGES_PER_TYPE = 40;
 
+// 韩国时区（UTC+9）的今天，用来区分「未来演出」与「历史演出」
+function todayKST() {
+  return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
 function decodeHtml(s) {
   return s
     .replace(/&amp;/g, '&')
@@ -91,10 +96,14 @@ export async function syncYes24({ dryRun = false } = {}) {
   const { data: existing } = await supabase.from('concerts').select('date').eq('venue_id', VENUE_ID);
   const existingDates = new Set((existing || []).map(c => c.date));
 
+  const today = todayKST();
   const toAdd = events.filter(e => !existingDates.has(e.date));
-  const result = { total: events.length, newCount: toAdd.length, added: [] };
+  // 未来演出：只提醒、不自动入库（站长手动翻译成合适语言后再加）；历史演出：自动补
+  const futureEvents = toAdd.filter(e => e.date >= today);
+  const pastEvents = toAdd.filter(e => e.date < today);
+  const result = { total: events.length, addedPast: pastEvents.length, future: futureEvents.length, added: [] };
 
-  for (const ev of toAdd) {
+  for (const ev of pastEvents) {
     const label = `${ev.title} @ ${ev.date}`;
     if (dryRun) { result.added.push(label); continue; }
     const { error } = await supabase.from('concerts').insert({
@@ -108,11 +117,19 @@ export async function syncYes24({ dryRun = false } = {}) {
     else { result.added.push(label); existingDates.add(ev.date); }
   }
 
-  if (!dryRun && toAdd.length > 0) {
-    const shown = toAdd.slice(0, 40);
-    const lines = shown.map(e => `• ${e.date}  ${e.title}`).join('\n');
-    const more = toAdd.length > 40 ? `\n…等共 ${toAdd.length} 场` : '';
-    await notify(`🎤 YES24 LIVE HALL 新增 ${toAdd.length} 场演出`, lines + more);
+  if (!dryRun) {
+    if (futureEvents.length > 0) {
+      const shown = futureEvents.slice(0, 40);
+      const lines = shown.map(e => `• ${e.date}  ${e.title}`).join('\n');
+      const more = futureEvents.length > 40 ? `\n…等共 ${futureEvents.length} 场` : '';
+      await notify(`🆕 YES24 LIVE HALL 发现 ${futureEvents.length} 场未来演出（未入库，请确认后手动添加）`, lines + more);
+    }
+    if (pastEvents.length > 0) {
+      const shown = pastEvents.slice(0, 40);
+      const lines = shown.map(e => `• ${e.date}  ${e.title}`).join('\n');
+      const more = pastEvents.length > 40 ? `\n…等共 ${pastEvents.length} 场` : '';
+      await notify(`🎤 YES24 LIVE HALL 新增 ${pastEvents.length} 场历史演出`, lines + more);
+    }
   }
 
   return result;
@@ -123,7 +140,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const dryRun = process.argv.includes('--dry-run');
   syncYes24({ dryRun })
     .then((r) => {
-      console.log(`\n[yes24] ${dryRun ? 'DRY-RUN' : '同步完成'}：官方共 ${r.total} 条，新增 ${r.newCount} 条`);
+      console.log(`\n[yes24] ${dryRun ? 'DRY-RUN' : '同步完成'}：官方共 ${r.total} 条，历史新增 ${r.addedPast} 条，未来提醒 ${r.future} 条`);
       for (const a of r.added) console.log('  +', a);
       process.exit(0);
     })

@@ -15,6 +15,11 @@ const VENUE_ID = 11;
 const VENUE_NAME = '高丽大化汀';
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36';
 
+// 韩国时区（UTC+9）的今天，用来区分「未来演出」与「历史演出」
+function todayKST() {
+  return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
 function decodeHtml(s) {
   return s
     .replace(/&amp;/g, '&')
@@ -85,11 +90,15 @@ export async function syncKuhj({ dryRun = false } = {}) {
   const { data: existing } = await supabase.from('concerts').select('date').eq('venue_id', VENUE_ID);
   const existingDates = new Set((existing || []).map(c => c.date));
 
+  const today = todayKST();
   const toAdd = events.filter(e => !existingDates.has(e.date));
+  // 未来演出：只提醒、不自动入库（站长手动翻译成合适语言后再加）；历史演出：自动补
+  const futureEvents = toAdd.filter(e => e.date >= today);
+  const pastEvents = toAdd.filter(e => e.date < today);
 
-  const result = { total: events.length, newCount: toAdd.length, added: [] };
+  const result = { total: events.length, addedPast: pastEvents.length, future: futureEvents.length, added: [] };
 
-  for (const ev of toAdd) {
+  for (const ev of pastEvents) {
     const label = `${ev.name} @ ${ev.date}${ev.end ? ' → ' + ev.end : ''}`;
     if (dryRun) {
       result.added.push(label);
@@ -112,9 +121,15 @@ export async function syncKuhj({ dryRun = false } = {}) {
   }
 
   // 有新增时通过微信（Server酱）提醒站长；未配置 SendKey 则静默跳过
-  if (!dryRun && toAdd.length > 0) {
-    const lines = toAdd.map(e => `• ${e.date}${e.end ? ' → ' + e.end : ''}  ${e.name}`).join('\n');
-    await notify(`🎤 高丽大化汀新增 ${toAdd.length} 场演出`, lines);
+  if (!dryRun) {
+    if (futureEvents.length > 0) {
+      const lines = futureEvents.map(e => `• ${e.date}${e.end ? ' → ' + e.end : ''}  ${e.name}`).join('\n');
+      await notify(`🆕 高丽大化汀发现 ${futureEvents.length} 场未来演出（未入库，请确认后手动添加）`, lines);
+    }
+    if (pastEvents.length > 0) {
+      const lines = pastEvents.map(e => `• ${e.date}${e.end ? ' → ' + e.end : ''}  ${e.name}`).join('\n');
+      await notify(`🎤 高丽大化汀新增 ${pastEvents.length} 场历史演出`, lines);
+    }
   }
 
   return result;
