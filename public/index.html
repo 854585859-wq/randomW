@@ -249,7 +249,7 @@
       14: { region: 'SEOUL REGION', capacity: '2,222', img: '/img/venues/kbs.jpg', pos: '50% 100%' }, // KBS Arena
       16: { region: 'SEOUL REGION', capacity: '2,000', img: '/img/venues/myunghwa.jpg' },          // 明华 Myunghwa
       12: { region: 'GYEONGGI REGION', capacity: '41,311', img: '/img/venues/goyang.jpg' },        // 高阳体育场
-      15: { region: 'SEOUL REGION', capacity: '2,500', img: '/img/venues/yes24.jpg' },             // YES24 LIVE HALL
+      15: { region: 'SEOUL REGION', capacity: '2,500', img: '/img/venues/yes24.jpg', seat: '/img/seats/yes24-floor.png', seat2: '/img/seats/yes24-reserved.png', seat3: '/img/seats/yes24-standing.png' },  // YES24 LIVE HALL
       13: { region: 'INCHEON REGION', capacity: '29,376', img: '/img/venues/incheon.jpg' }         // 仁川亚运主体育场
     };
     function venueRegion(name) {
@@ -339,7 +339,7 @@
       }
       html += '</div>';
       const vm = VENUE_META[venue.id] || {};
-      const seatImgs = [vm.seat, vm.seat2].filter(Boolean);
+      const seatImgs = [vm.seat, vm.seat2, vm.seat3].filter(Boolean);
       if (seatImgs.length) {
         html += `<div class="seat-section">
           <h3 class="seat-title">座位参考图</h3>
