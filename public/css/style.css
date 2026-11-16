@@ -461,24 +461,26 @@ a { color: var(--ink); text-decoration: none; }
 .footer-social a:hover { color: var(--accent); }
 .footer-note { font-family: var(--font-sub); font-size: 0.7rem; color: var(--ink-25); letter-spacing: 0.02em; margin-top: 0.5rem; }
 
-/* ---------- 底部 Tab（手机端 · 印章风） ---------- */
+/* ---------- 底部 Tab（手机端 · 与顶栏一致的粗野风） ---------- */
 .tabbar {
   display: none; position: fixed; bottom: 0; left: 0; right: 0;
   background: var(--paper-2); border-top: 3px solid var(--ink); z-index: 90;
-  box-shadow: 0 -5px 0 var(--gold);
 }
 .tabbar .tab {
   flex: 1; text-align: center; cursor: pointer; user-select: none;
-  padding: 9px 0 calc(9px + var(--safe-area-bottom));
-  font-family: var(--font-display); font-size: 0.68rem; letter-spacing: 0.08em;
+  padding: 14px 0 calc(14px + var(--safe-area-bottom));
+  font-family: var(--font-display); font-weight: 400; font-size: 0.8rem;
+  letter-spacing: 0.16em;
   color: var(--ink-50);
   border-left: 2px solid var(--line);
   position: relative; transition: background .15s, color .15s;
 }
 .tabbar .tab:first-child { border-left: none; }
-.tabbar .tab .ico { display: block; font-size: 1.2rem; margin-bottom: 3px; }
 .tabbar .tab.active { background: var(--ink); color: var(--paper-2); }
-.tabbar .tab.active .ico { color: var(--gold); }
+.tabbar .tab.active::before {
+  content: ''; position: absolute; top: -3px; left: 0; right: 0; height: 3px;
+  background: var(--accent);
+}
 
 .hidden { display: none !important; }
 .desktop-nav { display: flex; }
