@@ -101,7 +101,7 @@ export async function syncKuhj({ dryRun = false } = {}) {
       artist: ev.name,
       venue_id: VENUE_ID,
       venue_name: VENUE_NAME,
-      description: ev.title,
+      description: '来源：高丽大化汀官方',
     });
     if (error) {
       console.error(`insert fail (${label}):`, error.message);

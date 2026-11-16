@@ -14,7 +14,7 @@
   ],
   "crons": [
     {
-      "path": "/api/cron/scrape-kuhj",
+      "path": "/api/cron/scrape-all",
       "schedule": "37 1 * * *"
     },
     {

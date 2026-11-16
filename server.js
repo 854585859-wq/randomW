@@ -39,15 +39,24 @@ function isCronAuthorized(req) {
   return req.headers.authorization === `Bearer ${secret}`;
 }
 
-// 定时抓取高丽大化汀官方 history，自动补全演出档期
-app.get('/api/cron/scrape-kuhj', async (req, res) => {
+// 定时抓取：并行跑三个数据源（高丽大化汀 / 奥林匹克公园 / YES24 LIVE HALL）
+// 合并成一个 cron 入口，避免占用多个 cron 名额
+app.get('/api/cron/scrape-all', async (req, res) => {
   if (!isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const { syncKuhj } = await import('./scripts/kuhj-scraper.mjs');
-    const result = await syncKuhj();
-    res.json({ ok: true, ...result });
+    const [{ syncKuhj }, { syncKspo }, { syncYes24 }] = await Promise.all([
+      import('./scripts/kuhj-scraper.mjs'),
+      import('./scripts/kspo-scraper.mjs'),
+      import('./scripts/yes24-scraper.mjs'),
+    ]);
+    const [kuhj, kspo, yes24] = await Promise.all([
+      syncKuhj().catch(e => ({ error: e.message })),
+      syncKspo().catch(e => ({ error: e.message })),
+      syncYes24().catch(e => ({ error: e.message })),
+    ]);
+    res.json({ ok: true, kuhj, kspo, yes24 });
   } catch (err) {
-    console.error('KU scrape failed:', err.message);
+    console.error('Scrape-all failed:', err.message);
     res.status(500).json({ ok: false, error: err.message });
   }
 });

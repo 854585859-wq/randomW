@@ -120,10 +120,14 @@ export async function runDailyReport() {
 
   const totalConcerts = concerts ? concerts.length : 0;
 
-  // Yesterday's new additions
-  const newConcertLines = newConcerts.length === 0
-    ? '  无新增演唱会'
-    : newConcerts.map(c => `  • ${c.date}${c.end_date ? ' → ' + c.end_date : ''}  ${c.artist} @ ${c.venue_name}`).join('\n');
+  // Yesterday's new additions，区分「爬虫抓取」与「手动/其他」
+  const isScraped = c => c.description && c.description.startsWith('来源：');
+  const scrapedConcerts = newConcerts.filter(isScraped);
+  const manualConcerts = newConcerts.filter(c => !isScraped(c));
+  const fmtScraped = c => `  • ${c.date}${c.end_date ? ' → ' + c.end_date : ''}  ${c.artist} @ ${c.venue_name}（${(c.description || '').replace('来源：', '')}）`;
+  const fmtManual = c => `  • ${c.date}${c.end_date ? ' → ' + c.end_date : ''}  ${c.artist} @ ${c.venue_name}`;
+  const scrapedLines = scrapedConcerts.length === 0 ? '  无' : scrapedConcerts.map(fmtScraped).join('\n');
+  const manualLines = manualConcerts.length === 0 ? '  无' : manualConcerts.map(fmtManual).join('\n');
 
   const newVenueLines = newVenues.length === 0
     ? '  无新增场馆'
@@ -159,8 +163,11 @@ export async function runDailyReport() {
     `总演唱会场次：${totalConcerts}`,
     ``,
     `━━━━ 昨日新增 ━━━━`,
-    `新增演唱会（${newConcerts.length} 场）：`,
-    newConcertLines,
+    `🤖 爬虫抓取（${scrapedConcerts.length} 场）：`,
+    scrapedLines,
+    ``,
+    `✍️ 手动/其他（${manualConcerts.length} 场）：`,
+    manualLines,
     ``,
     `新增场馆（${newVenues.length} 个）：`,
     newVenueLines,
