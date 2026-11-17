@@ -234,23 +234,24 @@
     }
 
     // ── 场馆视图 ──
-    // 15 个场馆的真实信息：区域 / 座位数 / 图片（本地存储）
+    // 16 个场馆的真实信息：区域 / 座位数 / 图片（本地存储）
     const VENUE_META = {
       5:  { region: 'SEOUL REGION', capacity: '15,000', img: '/img/venues/kspo.jpg', seat: '/img/seats/kspo.jpg' },            // KSPO DOME
       2:  { region: 'INCHEON REGION', capacity: '15,000', img: '/img/venues/inspire.jpg', seat: '/img/seats/inspire.webp', seat2: '/img/seats/inspire-3d.jpg' },        // INSPIRE Arena
-      3:  { region: 'SEOUL REGION', capacity: '17,000–25,000', img: '/img/venues/gocheok.jpg' },   // 高尺天空巨蛋
+      3:  { region: 'SEOUL REGION', capacity: '17,000–25,000', img: '/img/venues/gocheok.jpg', seat: '/img/seats/gocheok.jpg' },   // 高尺天空巨蛋
       4:  { region: 'SEOUL REGION', capacity: '11,069', img: '/img/venues/jamsil.jpg' },           // 蚕室室内体育馆
       6:  { region: 'SEOUL REGION', capacity: '2,432–3,584', img: '/img/venues/olympic-hall.jpg', seat: '/img/seats/olympic-hall.jpg' }, // 奥林匹克大厅
       17: { region: 'SEOUL REGION', capacity: '5,003', img: '/img/venues/ticketlink-live.jpg', seat: '/img/seats/ticketlink.jpg' },   // TICKET LINK LIVE ARENA
       11: { region: 'SEOUL REGION', capacity: '5,000（坐席）–6,500（站席）', img: '/img/venues/hwajeong.jpg', seat: '/img/seats/hwajeong.jpg' },          // 高丽大化汀
-      7:  { region: 'SEOUL REGION', capacity: '4,507（含 1,324 座位）', img: '/img/venues/jangchung.jpg' },         // 奖忠体育馆
-      1:  { region: 'SEOUL REGION', capacity: '1,010', img: '/img/venues/ticketlink1975.jpg' },    // Ticketlink 1975 剧场
-      9:  { region: 'GYEONGGI REGION', capacity: '6,000–10,000', img: '/img/venues/kintex.jpg' },  // KINTEX HALL
-      14: { region: 'SEOUL REGION', capacity: '2,222', img: '/img/venues/kbs.jpg', pos: '50% 100%' }, // KBS Arena
-      16: { region: 'SEOUL REGION', capacity: '2,000', img: '/img/venues/myunghwa.jpg' },          // 明华 Myunghwa
-      12: { region: 'GYEONGGI REGION', capacity: '41,311', img: '/img/venues/goyang.jpg' },        // 高阳体育场
+      7:  { region: 'SEOUL REGION', capacity: '4,507（含 1,324 座位）', img: '/img/venues/jangchung.jpg', seat: '/img/seats/jangchung.png' },         // 奖忠体育馆
+      1:  { region: 'SEOUL REGION', capacity: '1,010', img: '/img/venues/ticketlink1975.jpg', seat: '/img/seats/ticketlink1975.jpg' },    // Ticketlink 1975 剧场
+      9:  { region: 'GYEONGGI REGION', capacity: '6,000–10,000', img: '/img/venues/kintex.jpg', seat: '/img/seats/kintex.jpg' },  // KINTEX HALL
+      14: { region: 'SEOUL REGION', capacity: '2,222', img: '/img/venues/kbs.jpg', pos: '50% 100%', seat: '/img/seats/kbs.jpg' }, // KBS Arena
+      16: { region: 'SEOUL REGION', capacity: '2,000', img: '/img/venues/myunghwa.jpg', seat: '/img/seats/myunghwa.png', seatNote: '仅供参考，该场馆有多种座位排列方式' },          // 明华 Myunghwa
+      12: { region: 'GYEONGGI REGION', capacity: '41,311', img: '/img/venues/goyang.jpg', seat: '/img/seats/goyang.webp' },        // 高阳体育场
       15: { region: 'SEOUL REGION', capacity: '2,500', img: '/img/venues/yes24.jpg', seat: '/img/seats/yes24-reserved.png', seat2: '/img/seats/yes24-standing.png' },  // YES24 LIVE HALL
-      13: { region: 'INCHEON REGION', capacity: '29,376', img: '/img/venues/incheon.jpg' }         // 仁川亚运主体育场
+      13: { region: 'INCHEON REGION', capacity: '29,376', img: '/img/venues/incheon.jpg', seat: '/img/seats/incheon.webp' }         // 仁川亚运主体育场
+      18: { region: 'SEOUL REGION', capacity: '5,400–7,500', img: '/img/venues/jamsil-student.jpg' }       // 蚕室学生体育馆
     };
     function venueRegion(name) {
       name = name || '';
@@ -344,7 +345,7 @@
         html += `<div class="seat-section">
           <h3 class="seat-title">座位参考图</h3>
           ${seatImgs.map((s, i) => `<div class="seat-figure"><img src="${s}" alt="${escHtml(venue.name)} 座位图 ${i + 1}" loading="lazy"></div>`).join('')}
-          <p class="seat-note">仅供参考，实际请以官方票务页面为准</p>
+          <p class="seat-note">${vm.seatNote || '仅供参考，实际请以官方票务页面为准'}</p>
         </div>`;
       }
       area.innerHTML = html;
