@@ -202,16 +202,16 @@ a { color: var(--ink); text-decoration: none; }
   border-bottom: 1px dashed var(--blue);
 }
 .calendar-day-header .dh-en {
-  font-family: var(--font-display); font-size: 0.72rem; letter-spacing: 0.04em;
+  font-family: var(--font-display); font-size: 0.68rem; letter-spacing: 0.04em;
   color: var(--ink); line-height: 1;
 }
 .calendar-day-header .dh-ko {
-  font-family: var(--font-sub); font-size: 0.56rem; font-weight: 600;
+  font-family: var(--font-sub); font-size: 0.52rem; font-weight: 600;
   color: var(--ink-50); line-height: 1;
 }
 .calendar-day-header.weekend { background: rgba(248,131,121,0.16); }
-.calendar-day-header.weekend .dh-en { color: var(--accent); }
-.calendar-day-header.weekend .dh-ko { color: var(--accent); }
+.calendar-day-header.weekend .dh-en { color: var(--accent); font-size: 0.9rem; }
+.calendar-day-header.weekend .dh-ko { color: var(--accent); font-size: 0.62rem; }
 .calendar-day-header:last-child { border-right: none; }
 .calendar-cell {
   background-color: var(--paper-2); min-height: 82px; padding: 0.4rem;
@@ -513,8 +513,10 @@ a { color: var(--ink); text-decoration: none; }
   #calTitle { font-size: 2.6rem; }
   .calendar-cell { min-height: 60px; padding: 0.26rem; }
   .calendar-day-header { padding: 0.35rem 0 0.4rem; }
-  .calendar-day-header .dh-en { font-size: 0.62rem; }
-  .calendar-day-header .dh-ko { font-size: 0.48rem; }
+  .calendar-day-header .dh-en { font-size: 0.56rem; }
+  .calendar-day-header .dh-ko { font-size: 0.44rem; }
+  .calendar-day-header.weekend .dh-en { font-size: 0.72rem; }
+  .calendar-day-header.weekend .dh-ko { font-size: 0.52rem; }
   .calendar-event { font-size: 0.54rem; }
   .event-card .date { width: 62px; }
   .event-card .date .md { font-size: 1.45rem; }

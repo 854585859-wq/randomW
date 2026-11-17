@@ -112,7 +112,7 @@
     const HEADER_EN = ['M', 'T', 'W', 'T', 'F', 'SAT', 'SUN'];
     const HEADER_KO = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
     const dayHeaders = () => HEADER_EN.map((en, i) =>
-      `<div class="calendar-day-header${i >= 5 ? ' weekend' : ''}"><span class="dh-en">${en}</span><span class="dh-ko">${HEADER_KO[i]}</span></div>`
+      `<div class="calendar-day-header${i >= 4 ? ' weekend' : ''}"><span class="dh-en">${en}</span><span class="dh-ko">${HEADER_KO[i]}</span></div>`
     ).join('');
     let allConcerts = [], allVenues = [];
     let currentYear, currentMonth;
